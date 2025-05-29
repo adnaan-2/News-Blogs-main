@@ -1,11 +1,270 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import Image from 'next/image'
+import { Upload, X } from 'lucide-react'
+
 export default function AdminCreatePostPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [imagePreview, setImagePreview] = useState(null)
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: 'business',
+    image: null
+  })
+
+  const categories = [
+    'business', 'tech', 'weather', 'automotive', 'pakistan', 
+    'global', 'health', 'sports', 'islam', 'education', 'entertainment'
+  ]
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // File size validation (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB')
+      return
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      image: file
+    }))
+
+    // Create image preview
+    const reader = new FileReader()
+    reader.onload = () => {
+      setImagePreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: null
+    }))
+    setImagePreview(null)
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      // Check if user is authenticated
+      if (status !== 'authenticated') {
+        setError('You must be logged in to create a post')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Create form data for multipart/form-data (for image upload)
+      const postFormData = new FormData()
+      postFormData.append('title', formData.title)
+      postFormData.append('content', formData.content)
+      postFormData.append('category', formData.category)
+      
+      if (formData.image) {
+        postFormData.append('image', formData.image)
+      }
+
+      // Send data to API route
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        body: postFormData,
+        // Don't set Content-Type header, the browser will set it correctly for FormData
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong')
+      }
+
+      // Post created successfully
+      setSuccess('Post created successfully!')
+      setFormData({
+        title: '',
+        content: '',
+        category: 'business',
+        image: null
+      })
+      setImagePreview(null)
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push('/admin/dashboard')
+      }, 2000)
+    } catch (err) {
+      console.error('Error creating post:', err)
+      setError(err.message || 'Failed to create post')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Show loading spinner while checking auth
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Create New Post</h2>
+      
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+      
+      {success && (
+        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+          <p className="text-green-700">{success}</p>
+        </div>
+      )}
+      
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-center text-gray-500">Create post form will be implemented here.</p>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          {/* Title Field */}
+          <div className="mb-4">
+            <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
+              Post Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter post title"
+            />
+          </div>
+          
+          {/* Category Selection */}
+          <div className="mb-4">
+            <label htmlFor="category" className="block text-gray-700 font-medium mb-2">
+              Category
+            </label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {categories.map(category => (
+                <option key={category} value={category} className="capitalize">
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Image Upload */}
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Featured Image
+            </label>
+            
+            {!imagePreview ? (
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <label 
+                  htmlFor="image" 
+                  className="flex flex-col items-center justify-center cursor-pointer"
+                >
+                  <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                  <span className="text-gray-500">Click to upload image</span>
+                  <span className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 5MB</span>
+                </label>
+              </div>
+            ) : (
+              <div className="relative">
+                <Image 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  width={400} 
+                  height={225} 
+                  className="rounded-md object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Content Field */}
+          <div className="mb-6">
+            <label htmlFor="content" className="block text-gray-700 font-medium mb-2">
+              Content
+            </label>
+            <textarea
+              id="content"
+              name="content"
+              value={formData.content}
+              onChange={handleChange}
+              required
+              rows={10}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Write your post content here..."
+            ></textarea>
+          </div>
+          
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Post'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
