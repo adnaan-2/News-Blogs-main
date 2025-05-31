@@ -1,13 +1,10 @@
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import bcrypt from 'bcryptjs';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -17,81 +14,47 @@ const handler = NextAuth({
           return null;
         }
 
-        try {
-          // Check if admin login
-          const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-          const adminPassword = process.env.ADMIN_PASSWORD;
-          
-          // Check if admin credentials match
-          if (
-            credentials.email === adminEmail && 
-            credentials.password === adminPassword
-          ) {
-            console.log("Admin login successful");
-            
-            // Return admin user object
-            return {
-              id: 'admin-id',
-              name: 'Administrator',
-              email: adminEmail,
-              role: 'admin'
-            };
-          }
-
-          // For regular users, check database
-          await connectDB();
-          
-          const user = await User.findOne({ email: credentials.email.toLowerCase() });
-          
-          if (!user) {
-            return null;
-          }
-          
-          const passwordMatch = await bcrypt.compare(credentials.password, user.password);
-          
-          if (!passwordMatch) {
-            return null;
-          }
-          
+        // Only check for admin credentials - no database lookup needed
+        if (credentials.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && 
+            credentials.password === process.env.ADMIN_PASSWORD) {
+          console.log("Admin login successful");
           return {
-            id: user._id.toString(),
-            name: user.name,
-            email: user.email,
-            role: user.role || 'user'
+            id: "admin-id",
+            email: process.env.NEXT_PUBLIC_ADMIN_EMAIL,
+            name: "Admin",
+            role: "admin"
           };
-        } catch (error) {
-          console.error("Auth error:", error);
-          return null;
         }
+        
+        // If not admin credentials, return null (unauthorized)
+        return null;
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
         token.role = user.role;
-        token.email = user.email;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.id;
+      if (session.user) {
         session.user.role = token.role;
+        session.user.id = token.id;
       }
       return session;
     }
   },
   pages: {
-    signIn: '/auth/login',
+    signIn: "/auth/login",
   },
   session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    strategy: "jwt",
   },
-  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -4,13 +4,19 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, FileText, Users, Clock } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const [posts, setPosts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+  const [stats, setStats] = useState({
+    totalPosts: 0,
+    totalUsers: 0,
+    pendingApprovals: 0
+  });
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -27,74 +33,84 @@ export default function AdminDashboard() {
     }
   }, [status, session, router]);
 
-  // Load posts from localStorage
+  // Fetch posts and dashboard statistics
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedPosts = localStorage.getItem('news-posts');
-      if (savedPosts) {
-        setPosts(JSON.parse(savedPosts));
-      } else {
-        // Default posts if none exist
-        const defaultPosts = [
-          {
-            id: '1',
-            title: 'Sample Post Title',
-            content: 'This is a sample post content.',
-            category: 'tech',
-            createdAt: new Date().toISOString(),
-            comments: []
+    async function fetchData() {
+      if (status === 'authenticated' && session?.user?.role === 'admin') {
+        setLoading(true);
+        
+        try {
+          // Fetch posts
+          const postsResponse = await fetch('/api/posts');
+          if (postsResponse.ok) {
+            const postsData = await postsResponse.json();
+            setPosts(postsData.posts || []);
           }
-        ];
-        setPosts(defaultPosts);
-        localStorage.setItem('news-posts', JSON.stringify(defaultPosts));
+          
+          // Fetch dashboard statistics
+          const statsResponse = await fetch('/api/admin/stats');
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            setStats({
+              totalPosts: statsData.stats.totalPosts || 0,
+              totalUsers: statsData.stats.totalUsers || 0,
+              pendingApprovals: statsData.stats.pendingApprovals || 0
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+        } finally {
+          setLoading(false);
+        }
       }
     }
-  }, []);
+    
+    fetchData();
+  }, [status, session]);
 
   const categories = [
     'business', 'tech', 'weather', 'automotive', 'pakistan', 
     'global', 'health', 'sports', 'islam', 'education', 'entertainment'
   ];
 
-  // Save posts to localStorage
-  const savePosts = (updatedPosts) => {
-    setPosts(updatedPosts);
-    localStorage.setItem('news-posts', JSON.stringify(updatedPosts));
-  };
-
-  const addPost = (post) => {
-    const newPost = {
-      id: Date.now().toString(),
-      ...post,
-      createdAt: new Date().toISOString(),
-      comments: []
-    };
-    const updatedPosts = [...posts, newPost];
-    savePosts(updatedPosts);
-  };
-
-  const updatePost = (id, updatedPost) => {
-    const updatedPosts = posts.map(post => 
-      post.id === id ? { ...post, ...updatedPost } : post
-    );
-    savePosts(updatedPosts);
-  };
-
-  const deletePost = (id) => {
-    const updatedPosts = posts.filter(post => post.id !== id);
-    savePosts(updatedPosts);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingPost) {
-      updatePost(editingPost.id, formData);
-    } else {
-      addPost(formData);
+    
+    try {
+      if (editingPost) {
+        // Update existing post
+        const response = await fetch(`/api/posts/${editingPost._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update post');
+        }
+      } else {
+        // Create new post - redirect to the create post page instead
+        router.push('/admin/posts/create');
+        return;
+      }
+      
+      // Refresh posts list
+      const postsResponse = await fetch('/api/posts');
+      if (postsResponse.ok) {
+        const postsData = await postsResponse.json();
+        setPosts(postsData.posts || []);
+      }
+      
+      // Reset form
+      setFormData({ title: '', content: '', category: 'business' });
+      setShowForm(false);
+      setEditingPost(null);
+    } catch (error) {
+      console.error('Error saving post:', error);
+      alert('Failed to save post. Please try again.');
     }
-    setFormData({ title: '', content: '', category: 'business' });
-    setShowForm(false);
-    setEditingPost(null);
   };
 
   const handleEdit = (post) => {
@@ -107,9 +123,29 @@ export default function AdminDashboard() {
     setShowForm(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      deletePost(id);
+      try {
+        const response = await fetch(`/api/posts/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete post');
+        }
+        
+        // Remove from local state
+        setPosts(posts.filter(post => post._id !== id));
+        
+        // Update statistics
+        setStats(prev => ({
+          ...prev,
+          totalPosts: Math.max(0, prev.totalPosts - 1)
+        }));
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        alert('Failed to delete post. Please try again.');
+      }
     }
   };
 
@@ -118,7 +154,7 @@ export default function AdminDashboard() {
   };
 
   // Show loading spinner while checking authentication
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-t-4 border-blue-500"></div>
@@ -131,7 +167,63 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
+          {/* Header with action buttons */}
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <div className="flex space-x-4">
+              <Link 
+                href="/admin/posts/create" 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Post
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-gray-800 px-4 py-2"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
           
+          {/* Admin Overview Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-6">Dashboard Overview</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Stats Cards */}
+              <div className="bg-white rounded-lg shadow p-6 flex items-center">
+                <div className="rounded-full bg-blue-100 p-3 mr-4">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-500">Total Posts</h3>
+                  <p className="text-3xl font-bold">{stats.totalPosts}</p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-6 flex items-center">
+                <div className="rounded-full bg-green-100 p-3 mr-4">
+                  <Clock className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-500">Pending Approvals</h3>
+                  <p className="text-3xl font-bold">{stats.pendingApprovals}</p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-6 flex items-center">
+                <div className="rounded-full bg-purple-100 p-3 mr-4">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-500">Users</h3>
+                  <p className="text-3xl font-bold">{stats.totalUsers}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Post Form Modal */}
           {showForm && (
@@ -204,12 +296,19 @@ export default function AdminDashboard() {
 
           {/* Posts List */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
+            <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Posts ({posts.length})</h2>
+              <Link 
+                href="/admin/posts/create" 
+                className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                New Post
+              </Link>
             </div>
             <div className="divide-y">
               {posts.map(post => (
-                <div key={post.id} className="p-6 flex justify-between items-start">
+                <div key={post._id} className="p-6 flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
                     <p className="text-gray-600 mb-2">
@@ -225,8 +324,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex space-x-2 ml-4">
                     <Link
-                      href={`/post/${post.id}`}
+                      href={`/post/${post._id}`}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                      target="_blank"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
@@ -237,7 +337,7 @@ export default function AdminDashboard() {
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(post.id)}
+                      onClick={() => handleDelete(post._id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -250,29 +350,6 @@ export default function AdminDashboard() {
                   No posts found. Create your first post!
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Admin Overview Section */}
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-6">Admin Overview</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Stats Cards */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium mb-2">Total Posts</h3>
-                <p className="text-3xl font-bold">{posts.length}</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium mb-2">Pending Approvals</h3>
-                <p className="text-3xl font-bold">0</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-medium mb-2">Users</h3>
-                <p className="text-3xl font-bold">1</p>
-              </div>
             </div>
           </div>
         </div>

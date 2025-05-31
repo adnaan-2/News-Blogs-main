@@ -5,7 +5,21 @@ const nextConfig = {
   },
   reactStrictMode: true,
   images: {
-    domains: ['your-image-domain.com'], // Add your image domains here
+    domains: ['localhost', 'res.cloudinary.com'], // Add Cloudinary domain
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      }
+    ],
   },
 }
 

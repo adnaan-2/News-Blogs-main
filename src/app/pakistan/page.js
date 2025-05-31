@@ -1,21 +1,45 @@
 'use client'
-import { usePosts } from '@/context/PostContext'
+import { useState, useEffect } from 'react'
 import BlogCard from '@/components/BlogCard'
 
 export default function PakistanPage() {
-  const { posts } = usePosts()
-  const pakistanPosts = posts.filter(post => post.category === 'pakistan')
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const response = await fetch('/api/posts?category=pakistan')
+        const data = await response.json()
+        setPosts(data.posts || [])
+      } catch (error) {
+        console.error('Error fetching tech posts:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-t-4 border-blue-500"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Pakistan News</h1>
-        {pakistanPosts.length === 0 ? (
-          <p className="text-gray-600 text-center py-12">No Pakistan posts available.</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Technology News</h1>
+        {posts.length === 0 ? (
+          <p className="text-gray-600 text-center py-12">No technology posts available.</p>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pakistanPosts.map(post => (
-              <BlogCard key={post.id} post={post} />
+            {posts.map(post => (
+              <BlogCard key={post._id} post={post} />
             ))}
           </div>
         )}
@@ -23,4 +47,3 @@ export default function PakistanPage() {
     </div>
   )
 }
-

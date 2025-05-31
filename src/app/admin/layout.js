@@ -35,46 +35,7 @@ export default function AdminLayout({ children }) {
   if (status === 'authenticated' && session.user.role === 'admin') {
     return (
       <div className="flex min-h-screen bg-gray-100">
-        {/* Admin sidebar */}
-        <div className="w-64 bg-gray-800 text-white">
-          <div className="p-4 border-b border-gray-700">
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          </div>
-          
-          <nav className="p-4">
-            <ul className="space-y-2">
-              <li>
-                <Link href="/admin/dashboard" className="block p-2 rounded hover:bg-gray-700">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/posts/create" className="block p-2 rounded hover:bg-gray-700">
-                  Create Post
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/posts" className="block p-2 rounded hover:bg-gray-700">
-                  All Posts
-                </Link>
-              </li>
-              <li className="pt-6">
-                <Link href="/" className="block p-2 rounded hover:bg-gray-700">
-                  View Site
-                </Link>
-              </li>
-              <li>
-                <button 
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="block w-full text-left p-2 rounded hover:bg-gray-700 text-red-400"
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-
+        
         {/* Main content */}
         <div className="flex-1">
           <header className="bg-white shadow">

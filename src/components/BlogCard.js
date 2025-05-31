@@ -1,21 +1,56 @@
 'use client'
 import Link from 'next/link'
 import { Calendar, User } from 'lucide-react'
+import { useState } from 'react'
+import CloudinaryImage from './CloudinaryImage'
+import Image from 'next/image'
 
-export default function BlogCard({ post }) {
+export default function BlogCard({ post, featured = false }) {
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  // Check if image is from Cloudinary
+  const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com');
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-        <h3 className="text-white text-lg font-semibold text-center px-4">
-          {post.title}
-        </h3>
+    <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ${featured ? 'transform hover:scale-[1.02]' : ''}`}>
+      <div className="relative h-48 w-full">
+        {isCloudinaryImage ? (
+          <CloudinaryImage 
+            src={post.imageUrl} 
+            alt={post.title}
+            fill
+            className="object-cover"
+          />
+        ) : post.imageUrl ? (
+          <Image 
+            src={post.imageUrl} 
+            alt={post.title}
+            fill
+            className="object-cover"
+            unoptimized={true}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400">No image</span>
+          </div>
+        )}
       </div>
       <div className="p-4">
+        <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+          {post.title}
+        </h3>
         <div className="flex items-center text-sm text-gray-500 mb-2">
           <Calendar className="w-4 h-4 mr-1" />
-          <span className="mr-4">{new Date(post.createdAt).toLocaleDateString()}</span>
+          <span className="mr-4">{formatDate(post.createdAt)}</span>
           <User className="w-4 h-4 mr-1" />
-          <span>Admin</span>
+          <span>{post.author?.name || 'Admin'}</span>
         </div>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">
           {post.content.substring(0, 150)}...
@@ -25,7 +60,7 @@ export default function BlogCard({ post }) {
             {post.category}
           </span>
           <Link 
-            href={`/post/${post.id}`}
+            href={`/post/${post._id}`}
             className="text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             Read More →

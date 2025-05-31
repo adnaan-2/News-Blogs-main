@@ -1,83 +1,81 @@
-'use client'
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import BlogCard from '@/components/BlogCard'
-import { usePosts } from '@/context/PostContext'
+import { Suspense } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import RecentPosts from '@/components/RecentPosts';
 
-export default function Home() {
-  const { posts } = usePosts()
-  const [searchTerm, setSearchTerm] = useState('')
+export const metadata = {
+  title: 'News Blog - Latest News and Articles',
+  description: 'Stay updated with the latest news across various categories.'
+};
 
-  // Handle admin search
-  useEffect(() => {
-    if (searchTerm.toLowerCase() === 'admin') {
-      window.location.href = '/admin/login'
-    }
-  }, [searchTerm])
-
-  const categories = ['business', 'tech', 'weather', 'automotive', 'pakistan', 'global', 'health', 'sports', 'islam', 'education', 'entertainment']
-  
-  const getLatestPostsByCategory = () => {
-    const result = {}
-    categories.forEach(category => {
-      const categoryPosts = posts.filter(post => post.category === category)
-      result[category] = categoryPosts.slice(0, 3) // Get latest 3 posts
-    })
-    return result
-  }
-
-  const latestPosts = getLatestPostsByCategory()
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header with Logo and Search */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            <span className="text-blue-600">News</span>Hub
-          </h1>
-          <div className="max-w-md mx-auto">
-            <input
-              type="text"
-              placeholder="Search... (type 'admin' for admin access)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+    <main className="min-h-screen">
+      {/* Hero Section */}
+      
+
+      {/* Recent Posts Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Latest Articles</h2>
+          <Suspense fallback={<PostsLoadingPlaceholder />}>
+            <RecentPosts />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Browse by Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {categories.map(category => (
+              <Link 
+                key={category.name} 
+                href={`/category/${category.name}`}
+                className="group bg-white rounded-lg shadow hover:shadow-md transition-all p-6 text-center"
+              >
+                <div className="text-blue-600 mb-3 flex justify-center">
+                  {category.icon}
+                </div>
+                <h3 className="font-medium text-lg capitalize group-hover:text-blue-600">
+                  {category.name}
+                </h3>
+              </Link>
+            ))}
           </div>
         </div>
-
-        {/* Latest Posts by Category */}
-        {categories.map(category => (
-          latestPosts[category].length > 0 && (
-            <div key={category} className="mb-12">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 capitalize">
-                  Latest {category} News
-                </h2>
-                <Link 
-                  href={`/${category}`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  View All {category}
-                </Link>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {latestPosts[category].map(post => (
-                  <BlogCard key={post.id} post={post} />
-                ))}
-              </div>
-            </div>
-          )
-        ))}
-
-        {/* Show message if no posts */}
-        {posts.length === 0 && (
-          <div className="text-center py-12">
-            <h2 className="text-xl text-gray-600">No posts available. Create some posts from admin panel!</h2>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+      </section>
+    </main>
+  );
 }
+
+// Loading placeholder
+function PostsLoadingPlaceholder() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[1, 2, 3, 4, 5, 6].map(i => (
+        <div key={i} className="bg-white rounded-lg shadow animate-pulse">
+          <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+          <div className="p-4">
+            <div className="h-6 bg-gray-200 rounded mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded mb-2 w-2/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Category icons (simplified)
+const categories = [
+  { name: 'business', icon: <span>💼</span> },
+  { name: 'tech', icon: <span>💻</span> },
+  { name: 'weather', icon: <span>🌦️</span> },
+  { name: 'automotive', icon: <span>🚗</span> },
+  { name: 'global', icon: <span>🌎</span> },
+  { name: 'health', icon: <span>⚕️</span> },
+  { name: 'sports', icon: <span>🏆</span> },
+  { name: 'education', icon: <span>📚</span> }
+];

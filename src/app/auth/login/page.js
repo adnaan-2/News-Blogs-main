@@ -2,35 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { status } = useSession();
 
-  // Check if user is already logged in
+  // Check if admin is already logged in
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/');
+      router.replace('/admin/dashboard');
     }
   }, [status, router]);
-
-  // Check for success message from registration
-  useEffect(() => {
-    const registered = searchParams.get('registered');
-    if (registered === 'true') {
-      setSuccess('Registration successful! Please log in.');
-    }
-  }, [searchParams]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,11 +29,12 @@ export default function LoginPage() {
     }));
   };
 
-  const handleAdminLogin = () => {
-    setFormData({
-      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com',
-      password: '' // We don't pre-fill password for security reasons
-    });
+  // Pre-fill admin email
+  const handlePreFillEmail = () => {
+    setFormData(prev => ({
+      ...prev,
+      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com'
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,27 +42,21 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // Check if it's an admin login attempt
-    const isAdminLogin = formData.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-    
-    // Set up the callback URL based on the user type
-    const callbackUrl = isAdminLogin ? '/admin/dashboard' : '/user/dashboard';
-
     try {
       const result = await signIn('credentials', {
-        redirect: false, // Don't redirect automatically
+        redirect: false,
         email: formData.email,
         password: formData.password
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError('Invalid admin credentials');
         setLoading(false);
         return;
       }
 
-      // Successful login, manually redirect
-      window.location.href = callbackUrl;
+      // Successful login, redirect to admin dashboard
+      router.push('/admin/dashboard');
       
     } catch (err) {
       console.error('Login error:', err);
@@ -94,7 +78,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
+          Admin Login
         </h2>
       </div>
 
@@ -105,17 +89,11 @@ export default function LoginPage() {
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
-          
-          {success && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
-              <p className="text-sm text-green-700">{success}</p>
-            </div>
-          )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                Admin Email
               </label>
               <div className="mt-1">
                 <input
@@ -133,7 +111,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Admin Password
               </label>
               <div className="mt-1">
                 <input
@@ -155,40 +133,18 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in as Admin'}
               </button>
             </div>
           </form>
 
           <div className="mt-6">
             <button
-              onClick={handleAdminLogin}
+              onClick={handlePreFillEmail}
               className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Admin Login
+              Use Default Admin Email
             </button>
-          </div>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Don't have an account?
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Link
-                href="/auth/signup"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-gray-50 hover:bg-gray-100"
-              >
-                Sign up
-              </Link>
-            </div>
           </div>
         </div>
       </div>

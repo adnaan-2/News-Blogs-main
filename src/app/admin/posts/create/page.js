@@ -45,6 +45,12 @@ export default function AdminCreatePostPage() {
       return
     }
 
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file')
+      return
+    }
+
     setFormData(prev => ({
       ...prev,
       image: file
@@ -67,7 +73,7 @@ export default function AdminCreatePostPage() {
     setImagePreview(null)
   }
 
-  // Handle form submission
+  // Add detailed logging to debug the form submission process
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -75,6 +81,8 @@ export default function AdminCreatePostPage() {
     setSuccess('')
 
     try {
+      console.log('Starting form submission')
+      
       // Check if user is authenticated
       if (status !== 'authenticated') {
         setError('You must be logged in to create a post')
@@ -82,6 +90,8 @@ export default function AdminCreatePostPage() {
         return
       }
 
+      console.log('Authentication check passed')
+      
       // Create form data for multipart/form-data (for image upload)
       const postFormData = new FormData()
       postFormData.append('title', formData.title)
@@ -90,21 +100,30 @@ export default function AdminCreatePostPage() {
       
       if (formData.image) {
         postFormData.append('image', formData.image)
+        console.log('Added image to form data:', formData.image.name, formData.image.size, formData.image.type)
+      } else {
+        console.log('No image to upload')
       }
 
+      console.log('Submitting form to API...')
+      
       // Send data to API route
       const response = await fetch('/api/posts', {
         method: 'POST',
         body: postFormData,
-        // Don't set Content-Type header, the browser will set it correctly for FormData
       })
 
+      console.log('API response received:', response.status)
+      
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong')
+        throw new Error(data.message || data.error || 'Something went wrong')
       }
 
+      console.log('Post created successfully!')
+      
       // Post created successfully
       setSuccess('Post created successfully!')
       setFormData({

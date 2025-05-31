@@ -15,6 +15,10 @@ const PostSchema = new mongoose.Schema({
     required: true,
     enum: ['business', 'tech', 'weather', 'automotive', 'pakistan', 'global', 'health', 'sports', 'islam', 'education', 'entertainment']
   },
+  imageUrl: {
+    type: String,
+    default: null
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -42,6 +46,11 @@ const PostSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'published', 'rejected'],
+    default: 'pending'
   }
 })
 
