@@ -5,31 +5,52 @@ import mongoose from 'mongoose';
 
 export async function GET(request) {
   try {
-    console.log("GET /api/posts - Fetching posts");
-    await connectDB();
-    
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')) : 10;
+    const limit = Number(searchParams.get('limit')) || 10;
+    const skip = Number(searchParams.get('skip')) || 0;
+    const search = searchParams.get('search');
+    const exclude = searchParams.get('exclude'); // ID of post to exclude (for related posts)
     
+    await connectDB();
+    
+    // Build query based on parameters
     let query = {};
     
-    // Filter by category if provided
     if (category) {
       query.category = category;
     }
     
-    console.log('API query:', query);
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { title: { $regex: searchRegex } },
+        { content: { $regex: searchRegex } }
+      ];
+    }
     
-    // Get posts
+    if (exclude && mongoose.Types.ObjectId.isValid(exclude)) {
+      query._id = { $ne: new mongoose.Types.ObjectId(exclude) };
+    }
+    
+    // Execute query
     const posts = await Post.find(query)
       .sort({ createdAt: -1 })
+      .skip(skip)
       .limit(limit)
       .lean();
     
-    console.log(`Found ${posts.length} posts`);
+    const total = await Post.countDocuments(query);
     
-    return NextResponse.json({ posts });
+    return NextResponse.json({ 
+      posts,
+      pagination: {
+        total,
+        limit,
+        skip,
+        hasMore: skip + limit < total
+      }
+    });
   } catch (error) {
     console.error('Error fetching posts:', error);
     return NextResponse.json(
