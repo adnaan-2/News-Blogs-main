@@ -1,6 +1,8 @@
 {
   "/page": "app/page.js",
   "/post/[id]/page": "app/post/[id]/page.js",
-  "/api/posts/route": "app/api/posts/route.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js"
+  "/business/page": "app/business/page.js",
+  "/automotive/page": "app/automotive/page.js",
+  "/pakistan/page": "app/pakistan/page.js",
+  "/api/posts/route": "app/api/posts/route.js"
 }
