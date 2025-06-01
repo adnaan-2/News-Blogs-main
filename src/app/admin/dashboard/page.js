@@ -114,13 +114,8 @@ export default function AdminDashboard() {
   };
 
   const handleEdit = (post) => {
-    setEditingPost(post);
-    setFormData({
-      title: post.title,
-      content: post.content,
-      category: post.category
-    });
-    setShowForm(true);
+    // Redirect to the edit page
+    router.push(`/admin/posts/edit/${post._id}`);
   };
 
   const handleDelete = async (id) => {
@@ -226,74 +221,8 @@ export default function AdminDashboard() {
           </div>
 
           {/* Post Form Modal */}
-          {showForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">
-                  {editingPost ? 'Edit Post' : 'Create New Post'}
-                </h2>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Category
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {categories.map(cat => (
-                        <option key={cat} value={cat} className="capitalize">{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="mb-6">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
-                      Content
-                    </label>
-                    <textarea
-                      value={formData.content}
-                      onChange={(e) => setFormData({...formData, content: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end space-x-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowForm(false);
-                        setEditingPost(null);
-                        setFormData({ title: '', content: '', category: 'business' });
-                      }}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      {editingPost ? 'Update' : 'Create'} Post
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
+          
+  
           {/* Posts List */}
           <div className="bg-white rounded-lg shadow">
             <div className="p-6 border-b flex items-center justify-between">

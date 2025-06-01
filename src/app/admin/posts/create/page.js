@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, Edit, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AdminCreatePostPage() {
   const { data: session, status } = useSession()
@@ -13,6 +14,8 @@ export default function AdminCreatePostPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [imagePreview, setImagePreview] = useState(null)
+  const [createdPostId, setCreatedPostId] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -73,6 +76,47 @@ export default function AdminCreatePostPage() {
     setImagePreview(null)
   }
 
+  // Handle delete post
+  const handleDeletePost = async () => {
+    if (!createdPostId) return
+    
+    try {
+      // Show deleting state
+      setIsSubmitting(true)
+      
+      const response = await fetch(`/api/posts/${createdPostId}`, {
+        method: 'DELETE',
+      })
+
+      // Get the response data
+      let data = {}
+      try {
+        data = await response.json()
+      } catch (e) {
+        // Response might not contain JSON
+        console.error("Error parsing response:", e)
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to delete post')
+      }
+
+      // Post deleted successfully
+      setSuccess('Post deleted successfully!')
+      setShowDeleteConfirm(false)
+      setCreatedPostId(null)
+      
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push('/admin/dashboard')
+      }, 2000)
+    } catch (err) {
+      setError(err.message || 'Failed to delete post')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   // Add detailed logging to debug the form submission process
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -124,6 +168,9 @@ export default function AdminCreatePostPage() {
 
       console.log('Post created successfully!')
       
+      // Store the created post ID
+      setCreatedPostId(data.post._id)
+      
       // Post created successfully
       setSuccess('Post created successfully!')
       setFormData({
@@ -133,11 +180,6 @@ export default function AdminCreatePostPage() {
         image: null
       })
       setImagePreview(null)
-
-      // Redirect to dashboard after 2 seconds
-      setTimeout(() => {
-        router.push('/admin/dashboard')
-      }, 2000)
     } catch (err) {
       console.error('Error creating post:', err)
       setError(err.message || 'Failed to create post')
@@ -167,7 +209,61 @@ export default function AdminCreatePostPage() {
       
       {success && (
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-          <p className="text-green-700">{success}</p>
+          <div className="flex flex-col">
+            <p className="text-green-700 mb-3">{success}</p>
+            
+            {createdPostId && (
+              <div className="flex space-x-4 mt-2">
+                <Link
+                  href={`/admin/posts/edit/${createdPostId}`}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  <Edit size={16} className="mr-2" />
+                  Edit Post
+                </Link>
+                
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Delete Post
+                </button>
+                
+                <Link
+                  href={`/post/${createdPostId}`}
+                  target="_blank"
+                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  View Post
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
+            <p className="mb-6">Are you sure you want to delete this post? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeletePost}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
       

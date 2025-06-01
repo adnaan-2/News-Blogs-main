@@ -101,7 +101,7 @@ export default function Home() {
             </div>
             <Link 
               href="/featured"
-              className="flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all text-sm"
+              className="flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-blue-400 hover:bg-blue-700 rounded-lg transition-all text-sm"
             >
               Explore All <ArrowRight className="ml-1 sm:ml-2" size={14} />
             </Link>
@@ -129,7 +129,7 @@ export default function Home() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6">
-                      <div className="bg-red-600 text-white text-xs px-2 py-0.5 sm:px-3 sm:py-1 uppercase font-semibold rounded-full inline-block mb-1 sm:mb-3">
+                      <div className="bg-blue-400 text-white text-xs px-2 py-0.5 sm:px-3 sm:py-1 uppercase font-semibold rounded-full inline-block mb-1 sm:mb-3">
                         {displayedFeaturedPosts[0].category}
                       </div>
                       <h3 className="text-sm sm:text-lg md:text-xl xl:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">{displayedFeaturedPosts[0].title}</h3>
@@ -168,7 +168,7 @@ export default function Home() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
                     <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
-                      <div className="bg-red-600 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 uppercase font-semibold rounded-full">
+                      <div className="bg-blue-400 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 uppercase font-semibold rounded-full">
                         {post.category}
                       </div>
                     </div>
@@ -230,7 +230,7 @@ export default function Home() {
                         )}
                         {/* Category label on image */}
                         <div className="absolute bottom-1 left-1">
-                          <div className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 uppercase font-medium rounded-sm">
+                          <div className="bg-blue-400 text-white text-[10px] px-1.5 py-0.5 uppercase font-medium rounded-sm">
                             {post.category}
                           </div>
                         </div>
