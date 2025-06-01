@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Upload, X, ArrowLeft, Loader } from 'lucide-react'
@@ -140,11 +139,6 @@ export default function AdminEditPostPage({ params }) {
       })
       
       console.log('Response status:', response.status)
-      
-      // Handle non-JSON response
-      if (response.status === 405) {
-        throw new Error('Method not allowed. The API endpoint does not support PUT requests.')
-      }
       
       if (!response.ok) {
         let errorMessage = 'Failed to update post'
