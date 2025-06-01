@@ -19,24 +19,28 @@ export default function BlogCard({ post, featured = false }) {
   const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com');
 
   return (
-    <div className="bg-white border-b border-gray-200 mb-6 hover:shadow-md transition-all">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
       <Link href={`/post/${post._id}`} className="block">
-        {/* Image section */}
-        <div className="relative h-56 w-full">
+        {/* Image section - Fixed height with proper object positioning */}
+        <div className="relative h-52 w-full overflow-hidden rounded-t-lg">
           {isCloudinaryImage ? (
             <CloudinaryImage 
               src={post.imageUrl} 
               alt={post.title}
               fill
-              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover object-center w-full h-full"
+              priority={featured}
             />
           ) : post.imageUrl ? (
             <Image 
               src={post.imageUrl} 
               alt={post.title}
               fill
-              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover object-center w-full h-full"
               unoptimized={true}
+              priority={featured}
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -44,18 +48,18 @@ export default function BlogCard({ post, featured = false }) {
             </div>
           )}
           
-          {/* Category tag */}
-          <div className="absolute bottom-0 left-0 bg-red-600 text-white text-xs px-3 py-1 uppercase font-semibold">
+          {/* Category tag - positioned better */}
+          <div className="absolute bottom-3 left-3 bg-red-600 text-white text-xs px-3 py-1 uppercase font-semibold rounded-sm shadow-md">
             {post.category}
           </div>
         </div>
       </Link>
 
-      {/* Content section */}
-      <div className="p-4">
+      {/* Content section - using flex-grow to fill space */}
+      <div className="p-4 flex-grow flex flex-col">
         {/* Headline */}
-        <Link href={`/post/${post._id}`}>
-          <h2 className="text-2xl font-bold mb-3 line-clamp-2 hover:text-red-600 transition-colors">
+        <Link href={`/post/${post._id}`} className="block mb-2">
+          <h2 className="text-xl font-bold line-clamp-2 hover:text-red-600 transition-colors">
             {post.title}
           </h2>
         </Link>
@@ -68,13 +72,13 @@ export default function BlogCard({ post, featured = false }) {
           <span>{post.author?.name || 'Admin'}</span>
         </div>
 
-        {/* Article excerpt */}
-        <p className="text-gray-700 mb-4 line-clamp-3 text-sm">
+        {/* Article excerpt - with flex-grow to push the footer to the bottom */}
+        <p className="text-gray-700 mb-4 line-clamp-3 text-sm flex-grow">
           {post.content}
         </p>
 
-        {/* Social sharing and read more */}
-        <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-2">
+        {/* Social sharing and read more - always at the bottom */}
+        <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-auto">
           <div className="flex space-x-2">
             <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + `/post/${post._id}` : '')}`} 
                target="_blank" rel="noopener noreferrer" 
@@ -104,7 +108,7 @@ export default function BlogCard({ post, featured = false }) {
           
           <Link 
             href={`/post/${post._id}`}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+            className="text-red-600 hover:text-red-800 font-medium text-sm"
           >
             Read More →
           </Link>

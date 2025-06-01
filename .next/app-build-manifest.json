@@ -16,20 +16,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/post/[id]/page.js"
     ],
-    "/business/page": [
+    "/global/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/business/page.js"
+      "static/chunks/app/global/page.js"
     ],
-    "/automotive/page": [
+    "/tech/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/automotive/page.js"
+      "static/chunks/app/tech/page.js"
     ],
     "/pakistan/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/pakistan/page.js"
+    ],
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

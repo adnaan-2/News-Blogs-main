@@ -130,19 +130,17 @@ export default function Navbar() {
     }
   }
 
-  const isAdmin = session?.user?.role === 'admin'
-
   return (
     <div className="bg-gray-900 text-white sticky top-0 z-50">
       <div className="container mx-auto px-4">
         {/* Top row: Logo and Search */}
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-6">
           {/* Logo on the left */}
-          <Link href="/" className="text-2xl font-bold">NewsHub</Link>
+          <Link href="/" className="text-5xl font-extrabold tracking-tight">PakistanInfo</Link>
           
           {/* Mobile menu button (only visible on mobile) */}
           <button className="md:hidden" onClick={toggleMenu} aria-label="Toggle menu">
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
           
           {/* Search Bar on the right (desktop only) */}
@@ -152,7 +150,7 @@ export default function Navbar() {
                 <input
                   type="text"
                   placeholder="Search articles..."
-                  className="w-full py-1.5 pl-3 pr-10 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full py-2 pl-4 pr-10 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 text-base"
                   value={searchQuery}
                   onChange={handleInputChange}
                   onFocus={() => {
@@ -165,7 +163,7 @@ export default function Navbar() {
                   type="submit"
                   className="absolute inset-y-0 right-0 px-3 flex items-center"
                 >
-                  <Search size={18} className="text-gray-500" />
+                  <Search size={20} className="text-gray-500" />
                 </button>
               </div>
 
@@ -220,7 +218,7 @@ export default function Navbar() {
                       </ul>
                       <div className="border-t border-gray-100 p-2">
                         <button 
-                          className="w-full text-center text-blue-600 hover:text-blue-800 text-sm py-1"
+                          className="w-full text-center text-blue-600 hover:text-blue-800 text-sm font-medium py-1"
                           onClick={() => {
                             router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
                             setShowResults(false)
@@ -242,86 +240,50 @@ export default function Navbar() {
         </div>
         
         {/* Bottom row: Navigation (desktop only) */}
-        <div className="hidden md:flex justify-center border-t border-gray-800 py-2">
-          <nav className="flex items-center space-x-6">
-            <Link href="/" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Home</Link>
-            <Link href="/business" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Business</Link>
-            <Link href="/tech" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Tech</Link>
-            <Link href="/weather" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Weather</Link>
-            <Link href="/automotive" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Automotive</Link>
-            <Link href="/pakistan" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Pakistan</Link>
-            <Link href="/global" className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium">Global</Link>
+        <div className="hidden md:flex justify-center border-t border-gray-800 py-3 text-2xl">
+          <nav className="flex items-center space-x-8">
+            <Link href="/" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-2xl font-bold">Home</Link>
+            <Link href="/business" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Business</Link>
+            <Link href="/tech" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Tech</Link>
+            <Link href="/weather" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Weather</Link>
+            <Link href="/automotive" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Automotive</Link>
+            <Link href="/pakistan" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Pakistan</Link>
+            <Link href="/global" className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold">Global</Link>
             
             {/* Lifestyle dropdown menu */}
             <div className="relative">
               <button 
                 onClick={toggleLifestyleDropdown}
-                className="py-3 px-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium flex items-center"
+                className="py-3 px-2 hover:text-red-400 transition-colors uppercase text-xl font-bold flex items-center"
                 aria-expanded={lifestyleDropdownOpen}
               >
-                Lifestyle <ChevronDown size={16} className="ml-1" />
+                Lifestyle <ChevronDown size={20} className="ml-1" />
               </button>
               
               {lifestyleDropdownOpen && (
-                <div className="absolute top-full left-0 bg-gray-800 py-2 w-48 shadow-xl rounded-b-md">
-                  <Link href="/category/health" className="block px-4 py-2 hover:bg-gray-700 text-sm">Health</Link>
-                  <Link href="/category/sports" className="block px-4 py-2 hover:bg-gray-700 text-sm">Sports</Link>
-                  <Link href="/category/entertainment" className="block px-4 py-2 hover:bg-gray-700 text-sm">Entertainment</Link>
-                  <Link href="/category/education" className="block px-4 py-2 hover:bg-gray-700 text-sm">Education</Link>
-                  <Link href="/category/islam" className="block px-4 py-2 hover:bg-gray-700 text-sm">Religion</Link>
+                <div className="absolute top-full left-0 bg-gray-800 py-3 w-56 shadow-xl rounded-b-md">
+                  <Link href="/category/health" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Health</Link>
+                  <Link href="/category/sports" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Sports</Link>
+                  <Link href="/category/entertainment" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Entertainment</Link>
+                  <Link href="/category/education" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Education</Link>
+                  <Link href="/category/islam" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Religion</Link>
                 </div>
               )}
             </div>
           </nav>
         </div>
         
-        {/* Right side auth controls */}
-        <div className="hidden md:flex justify-end border-t border-gray-800 py-2">
-          <div className="flex items-center">
-            {session ? (
-              <>
-                {/* If user is logged in */}
-                <span className="mr-2 text-sm">
-                  Hi, {session.user.name || 'Admin'}
-                </span>
-                
-                {/* Dashboard button - only for admin */}
-                <Link 
-                  href="/admin/dashboard" 
-                  className="bg-purple-600 hover:bg-purple-700 text-white py-1 px-3 rounded text-sm mr-2"
-                >
-                  Admin
-                </Link>
-                
-                <button 
-                  onClick={() => signOut()} 
-                  className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Just a simple text link for admin login */}
-                <Link href="/auth/login" className="text-sm text-gray-300 hover:text-white">
-                
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-        
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-800">
+          <div className="md:hidden py-2 border-t border-gray-800">
             {/* Search Bar for Mobile */}
-            <div className="mb-4" ref={searchRef}>
+            <div className="mb-6" ref={searchRef}>
               <form onSubmit={handleSearch}>
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search articles..."
-                    className="w-full py-2 pl-3 pr-10 rounded text-gray-900 focus:outline-none text-sm"
+                    className="w-full py-3 pl-4 pr-10 rounded-lg text-gray-900 focus:outline-none text-base"
                     value={searchQuery}
                     onChange={handleInputChange}
                     onFocus={() => {
@@ -334,7 +296,7 @@ export default function Navbar() {
                     type="submit"
                     className="absolute inset-y-0 right-0 px-3 flex items-center"
                   >
-                    <Search size={18} className="text-gray-500" />
+                    <Search size={20} className="text-gray-500" />
                   </button>
                 </div>
                 
@@ -389,7 +351,7 @@ export default function Navbar() {
                         </ul>
                         <div className="border-t border-gray-100 p-2">
                           <button 
-                            className="w-full text-center text-blue-600 hover:text-blue-800 text-sm py-1"
+                            className="w-full text-center text-blue-600 hover:text-blue-800 text-base font-medium py-2"
                             onClick={() => {
                               router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
                               setShowResults(false)
@@ -401,7 +363,7 @@ export default function Navbar() {
                         </div>
                       </>
                     ) : (
-                      <div className="p-3 text-center text-gray-600">
+                      <div className="p-4 text-center text-gray-600">
                         No results found for "{searchQuery}"
                       </div>
                     )}
@@ -410,143 +372,105 @@ export default function Navbar() {
               </form>
             </div>
             
-            <nav className="flex flex-col space-y-2">
+            <nav className="flex flex-col">
               <Link 
                 href="/" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 href="/business" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Business
               </Link>
               <Link 
                 href="/tech" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Tech
               </Link>
               <Link 
                 href="/weather" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Weather
               </Link>
               <Link 
                 href="/automotive" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Automotive
               </Link>
               <Link 
                 href="/pakistan" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pakistan
               </Link>
               <Link 
                 href="/global" 
-                className="py-2 hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                className="py-3 hover:text-red-400 transition-colors uppercase text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Global
               </Link>
               
               {/* Lifestyle section in mobile menu */}
-              <div className="py-2">
+              <div className="py-3">
                 <button 
-                  className="flex items-center justify-between w-full hover:text-gray-300 transition-colors uppercase text-sm font-medium"
+                  className="flex items-center justify-between w-full hover:text-red-400 transition-colors uppercase text-xl font-bold"
                   onClick={() => setLifestyleDropdownOpen(!lifestyleDropdownOpen)}
                 >
                   Lifestyle
-                  <ChevronDown size={16} className={`transform transition-transform ${lifestyleDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={20} className={`transform transition-transform ${lifestyleDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {lifestyleDropdownOpen && (
-                  <div className="pl-4 mt-2 space-y-2 border-l border-gray-700">
+                  <div className="pl-6 mt-3 space-y-3 border-l-2 border-gray-700">
                     <Link 
                       href="/category/health" 
-                      className="block py-2 hover:text-gray-300 text-sm"
+                      className="block py-2 hover:text-red-400 text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Health
                     </Link>
                     <Link 
                       href="/category/sports" 
-                      className="block py-2 hover:text-gray-300 text-sm"
+                      className="block py-2 hover:text-red-400 text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Sports
                     </Link>
                     <Link 
                       href="/category/entertainment" 
-                      className="block py-2 hover:text-gray-300 text-sm"
+                      className="block py-2 hover:text-red-400 text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Entertainment
                     </Link>
                     <Link 
                       href="/category/education" 
-                      className="block py-2 hover:text-gray-300 text-sm"
+                      className="block py-2 hover:text-red-400 text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Education
                     </Link>
                     <Link 
                       href="/category/islam" 
-                      className="block py-2 hover:text-gray-300 text-sm"
+                      className="block py-2 hover:text-red-400 text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Religion
                     </Link>
                   </div>
-                )}
-              </div>
-              
-              {/* Auth area for mobile */}
-              <div className="pt-4 mt-2 border-t border-gray-800 flex flex-col space-y-2">
-                {session ? (
-                  <>
-                    <span className="text-sm">
-                      Hi, {session.user.name || 'Admin'}
-                    </span>
-                    <Link 
-                      href="/admin/dashboard"
-                      className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded text-center text-sm"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Admin Dashboard
-                    </Link>
-                    <button 
-                      onClick={() => {
-                        signOut();
-                        setMobileMenuOpen(false);
-                      }} 
-                      className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-center text-sm"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {/* Simple text link for admin in mobile view too */}
-                    <Link 
-                      href="/auth/login" 
-                      className="text-gray-300 hover:text-white text-sm"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                    
-                    </Link>
-                  </>
                 )}
               </div>
             </nav>

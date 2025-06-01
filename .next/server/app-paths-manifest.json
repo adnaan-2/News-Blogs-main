@@ -1,8 +1,12 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
   "/post/[id]/page": "app/post/[id]/page.js",
-  "/business/page": "app/business/page.js",
-  "/automotive/page": "app/automotive/page.js",
+  "/global/page": "app/global/page.js",
   "/pakistan/page": "app/pakistan/page.js",
-  "/api/posts/route": "app/api/posts/route.js"
+  "/tech/page": "app/tech/page.js",
+  "/api/posts/route": "app/api/posts/route.js",
+  "/api/posts/[id]/route": "app/api/posts/[id]/route.js",
+  "/api/comments/route": "app/api/comments/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js"
 }

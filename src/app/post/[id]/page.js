@@ -43,14 +43,14 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="animate-pulse">
-          <div className="h-10 bg-gray-200 rounded max-w-md mb-6"></div>
-          <div className="h-72 bg-gray-200 rounded-md mb-6"></div>
-          <div className="space-y-3 mb-6">
-            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-6 bg-gray-200 rounded"></div>
-            <div className="h-6 bg-gray-200 rounded w-5/6"></div>
+          <div className="h-8 bg-gray-200 rounded max-w-md mb-4"></div>
+          <div className="h-64 sm:h-72 md:h-80 bg-gray-200 rounded-md mb-4"></div>
+          <div className="space-y-2 mb-6">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -59,9 +59,9 @@ export default function PostDetailPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-10">
-        <div className="bg-red-50 text-red-700 p-6 rounded-md">
-          <h2 className="font-bold text-lg mb-3">Error</h2>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="bg-red-50 text-red-700 p-4 sm:p-6 rounded-md">
+          <h2 className="font-bold text-lg mb-2">Error</h2>
           <p className="mb-4">{error}</p>
           <Link href="/" className="text-blue-600 hover:underline">
             Return to homepage
@@ -79,36 +79,37 @@ export default function PostDetailPage() {
   const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com');
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Back button */}
-      <Link href="/" className="flex items-center text-gray-600 hover:text-blue-600 mb-6">
+      <Link href="/" className="inline-flex items-center text-gray-600 hover:text-blue-600 mb-4 sm:mb-6">
         <ArrowLeft className="h-4 w-4 mr-1" />
-        Back to Posts
+        <span>Back to Posts</span>
       </Link>
 
       {/* Post content */}
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Main content */}
-        <div className="md:w-3/4">
+        <div className="w-full lg:w-2/3">
           {/* Title */}
-          <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-6">{post.title}</h1>
           
           {/* Post meta */}
-          <div className="flex items-center text-sm text-gray-500 mb-6">
+          <div className="flex flex-wrap items-center text-sm text-gray-500 mb-4 sm:mb-6">
             <Calendar className="w-4 h-4 mr-1" />
             <span className="mr-4">{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
             <User className="w-4 h-4 mr-1" />
             <span>{post.author?.name || 'Admin'}</span>
           </div>
           
-          {/* Featured image */}
-          <div className="relative h-96 w-full mb-6">
+          {/* Featured image - Better responsive handling */}
+          <div className="relative aspect-[16/9] w-full mb-4 sm:mb-6 overflow-hidden rounded-lg">
             {isCloudinaryImage ? (
               <CloudinaryImage 
                 src={post.imageUrl} 
                 alt={post.title}
                 fill
-                className="object-cover rounded-lg"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 60vw"
+                className="object-contain bg-gray-100"
                 priority
               />
             ) : post.imageUrl ? (
@@ -116,7 +117,8 @@ export default function PostDetailPage() {
                 src={post.imageUrl} 
                 alt={post.title}
                 fill
-                className="object-cover rounded-lg"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 60vw"
+                className="object-contain bg-gray-100"
                 unoptimized={true}
                 priority
               />
@@ -128,25 +130,25 @@ export default function PostDetailPage() {
           </div>
           
           {/* Post content */}
-          <div className="prose max-w-none mb-8">
+          <article className="prose prose-sm sm:prose max-w-none mb-6">
             {post.content.split('\n').map((paragraph, index) => (
               paragraph.trim() ? <p key={index} className="mb-4">{paragraph}</p> : null
             ))}
-          </div>
+          </article>
           
           {/* Category and tags */}
           {post.category && (
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4 sm:mb-6">
               <Tag className="w-4 h-4 mr-1 text-gray-500" />
-              <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">
+              <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
                 {post.category}
               </span>
             </div>
           )}
           
           {/* Share section */}
-          <div className="flex items-center border-t border-b border-gray-100 py-6 mb-8">
-            <span className="mr-4 font-medium text-sm flex items-center">
+          <div className="flex flex-wrap items-center border-t border-b border-gray-100 py-4 sm:py-6 mb-6">
+            <span className="mr-3 font-medium text-sm flex items-center">
               <Share className="w-4 h-4 mr-1" />
               Share:
             </span>
@@ -176,19 +178,23 @@ export default function PostDetailPage() {
           </div>
           
           {/* Comments section */}
-          <Comments postId={id} />
+          <div className="mb-8">
+            <Comments postId={id} />
+          </div>
           
           {/* Related posts */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Related Articles</h2>
+          <div className="mt-8 sm:mt-10">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Related Articles</h2>
             <RelatedPosts currentPostId={id} category={post.category} />
           </div>
         </div>
         
-        {/* Sidebar */}
-        <div className="md:w-1/4">
-          <FeaturedSidebar />
-        </div>
+        {/* Sidebar - Only show on larger screens or at bottom on mobile */}
+        <aside className="w-full lg:w-1/3 mt-8 lg:mt-0">
+          <div className="sticky top-20">
+            <FeaturedSidebar />
+          </div>
+        </aside>
       </div>
     </div>
   );
