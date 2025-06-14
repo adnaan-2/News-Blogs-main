@@ -62,8 +62,21 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    // Check authentication
-    const { formData, token } = await validateRequest(request);
+    // Parse form data
+    const formData = await request.formData();
+    
+    const title = formData.get('title');
+    const content = formData.get('content');
+    const category = formData.get('category');
+    const image = formData.get('image');
+    
+    // Validate required fields
+    if (!title || !content || !category) {
+      return NextResponse.json(
+        { error: 'Title, content, and category are required' },
+        { status: 400 }
+      );
+    }
     
     // Connect to database
     await connectDB();
@@ -71,20 +84,22 @@ export async function POST(request) {
     let imageUrl = null;
     
     // Upload image to Cloudinary if provided
-    if (formData.image) {
-      imageUrl = await uploadImage(formData.image);
+    if (image && image instanceof File) {
+      try {
+        // Your image upload logic here
+        // For now, we'll use a placeholder URL
+        imageUrl = `/uploads/${Date.now()}-${image.name}`;
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError);
+      }
     }
-
-    // Generate a fixed admin ID if not available
-    const adminId = new mongoose.Types.ObjectId();
     
-    // Create new post document
+    // Create new post document - without requiring a real user reference
     const post = await Post.create({
-      title: formData.title,
-      content: formData.content,
-      category: formData.category,
+      title,
+      content,
+      category,
       imageUrl,
-      author: adminId,
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -96,35 +111,8 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error creating post:', error);
     return NextResponse.json(
-      { message: 'Error creating post', error: error.message },
+      { error: 'Failed to create post' },
       { status: 500 }
     );
   }
-}
-
-// Helper functions for POST
-async function validateRequest(request) {
-  // Parse form data
-  const formData = await request.formData();
-  
-  const title = formData.get('title');
-  const content = formData.get('content');
-  const category = formData.get('category');
-  const image = formData.get('image');
-  
-  // Validate required fields
-  if (!title || !content || !category) {
-    throw new Error('Title, content, and category are required');
-  }
-  
-  return { 
-    formData: { title, content, category, image },
-    token: null // We don't need token validation for admin-only system
-  };
-}
-
-async function uploadImage(imageFile) {
-  // Your existing image upload code
-  // Return the image URL or null
-  return null;
 }

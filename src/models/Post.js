@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const PostSchema = new mongoose.Schema({
   title: {
@@ -13,7 +13,8 @@ const PostSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['business', 'tech', 'weather', 'automotive', 'pakistan', 'global', 'health', 'sports', 'islam', 'education', 'entertainment']
+    enum: ['business', 'tech', 'weather', 'automotive', 'pakistan', 
+           'global', 'health', 'sports', 'islam', 'education', 'entertainment']
   },
   imageUrl: {
     type: String,
@@ -22,19 +23,18 @@ const PostSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Make author optional since we only have admin users
   },
   comments: [{
+    user: {
+      type: String,
+      required: true
+    },
     text: {
       type: String,
       required: true
     },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    createdAt: {
+    date: {
       type: Date,
       default: Date.now
     }
@@ -46,12 +46,10 @@ const PostSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'published', 'rejected'],
-    default: 'pending'
   }
-})
+});
 
-export default mongoose.models.Post || mongoose.model('Post', PostSchema)
+// Check if the model exists before creating it
+const Post = mongoose.models.Post || mongoose.model('Post', PostSchema);
+
+export default Post;

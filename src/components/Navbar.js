@@ -398,11 +398,11 @@ export default function Navbar() {
               
               {lifestyleDropdownOpen && (
                 <div className="absolute top-full left-0 bg-gray-800 py-3 w-56 shadow-xl rounded-b-md border border-gray-700">
-                  <Link href="/category/health" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Health</Link>
-                  <Link href="/category/sports" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Sports</Link>
-                  <Link href="/category/entertainment" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Entertainment</Link>
-                  <Link href="/category/education" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Education</Link>
-                  <Link href="/category/islam" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Religion</Link>
+                  <Link href="/lifestyle/health" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Health</Link>
+                  <Link href="/lifestyle/sports" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Sports</Link>
+                  <Link href="/lifestyle/entertainment" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Entertainment</Link>
+                  <Link href="/lifestyle/education" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Education</Link>
+                  <Link href="/lifestyle/islam" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Religion</Link>
                 </div>
               )}
             </div>
@@ -486,35 +486,35 @@ export default function Navbar() {
                 {lifestyleDropdownOpen && (
                   <div className="pl-4 border-l-2 border-blue-500 ml-2">
                     <Link 
-                      href="/category/health" 
+                      href="/lifestyle/health" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Health
                     </Link>
                     <Link 
-                      href="/category/sports" 
+                      href="/lifestyle/sports" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Sports
                     </Link>
                     <Link 
-                      href="/category/entertainment" 
+                      href="/lifestyle/entertainment" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Entertainment
                     </Link>
                     <Link 
-                      href="/category/education" 
+                      href="/lifestyle/education" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Education
                     </Link>
                     <Link 
-                      href="/category/islam" 
+                      href="/lifestyle/islam" 
                       className="block py-3 hover:bg-gray-800 text-base"
                       onClick={() => setMobileMenuOpen(false)}
                     >
