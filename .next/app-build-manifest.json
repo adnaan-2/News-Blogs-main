@@ -11,36 +11,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/admin/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/dashboard/page.js"
-    ],
-    "/admin/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/layout.js"
-    ],
-    "/admin/posts/edit/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/posts/edit/[id]/page.js"
-    ],
-    "/weather/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/weather/page.js"
-    ],
-    "/global/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/global/page.js"
-    ],
-    "/pakistan/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/pakistan/page.js"
-    ],
     "/automotive/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -51,10 +21,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/business/page.js"
     ],
-    "/post/[id]/page": [
+    "/tech/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/post/[id]/page.js"
+      "static/chunks/app/tech/page.js"
+    ],
+    "/weather/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/weather/page.js"
+    ],
+    "/pakistan/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/pakistan/page.js"
     ]
   }
 }

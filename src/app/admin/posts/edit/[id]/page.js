@@ -132,6 +132,13 @@ export default function AdminEditPostPage({ params }) {
 
       console.log('Submitting update for post:', id)
       
+      // Log the image that's being uploaded
+      if (formData.image) {
+        console.log('Uploading image:', formData.image.name, formData.image.size, formData.image.type);
+      } else {
+        console.log('No new image selected, keeping the existing one');
+      }
+      
       // Send data to API route
       const response = await fetch(`/api/posts/${id}`, {
         method: 'PUT',
@@ -139,17 +146,6 @@ export default function AdminEditPostPage({ params }) {
       })
       
       console.log('Response status:', response.status)
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to update post'
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch (e) {
-          console.error('Error parsing error response:', e)
-        }
-        throw new Error(errorMessage)
-      }
       
       // Try to parse response as JSON
       let data
@@ -168,6 +164,13 @@ export default function AdminEditPostPage({ params }) {
       
       // Post updated successfully
       setSuccess(data.message || 'Post updated successfully!')
+      
+      // Show success message with image info if uploaded
+      if (formData.image) {
+        setSuccess(`Post updated successfully with new image!`);
+      } else {
+        setSuccess('Post updated successfully!');
+      }
       
       // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {

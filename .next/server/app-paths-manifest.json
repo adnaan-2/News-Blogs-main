@@ -1,13 +1,10 @@
 {
   "/page": "app/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/automotive/page": "app/automotive/page.js",
+  "/tech/page": "app/tech/page.js",
   "/api/posts/route": "app/api/posts/route.js",
-  "/global/page": "app/global/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/business/page": "app/business/page.js",
-  "/post/[id]/page": "app/post/[id]/page.js",
-  "/api/posts/[id]/route": "app/api/posts/[id]/route.js",
-  "/api/comments/route": "app/api/comments/route.js",
-  "/api/admin/stats/route": "app/api/admin/stats/route.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
-  "/admin/posts/edit/[id]/page": "app/admin/posts/edit/[id]/page.js"
+  "/weather/page": "app/weather/page.js",
+  "/pakistan/page": "app/pakistan/page.js"
 }

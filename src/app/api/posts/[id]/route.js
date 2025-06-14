@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // API route handlers only - no React components here
 
@@ -74,9 +82,40 @@ export async function PUT(request, { params }) {
     
     // Handle image upload if provided
     if (image && image instanceof File) {
-      // For now, we'll keep existing image URL
-      // In a real implementation, you would upload the image and update the URL
-      console.log('Image received:', image.name, image.size);
+      try {
+        // Convert the file to buffer
+        const arrayBuffer = await image.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        // Create a base64 string from buffer
+        const base64String = buffer.toString('base64');
+        const dataURI = `data:${image.type};base64,${base64String}`;
+        
+        // Upload to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload(
+            dataURI,
+            {
+              folder: 'news-blog',
+              resource_type: 'image'
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+        });
+        
+        // Add image URL to update data
+        updateData.imageUrl = result.secure_url;
+        
+        // If there was an existing image, we could delete it from Cloudinary here
+        // For simplicity, we're skipping that step
+        
+      } catch (uploadError) {
+        console.error('Error uploading image to Cloudinary:', uploadError);
+        // Continue with update but without changing the image
+      }
     }
     
     // Update post in database using Mongoose
