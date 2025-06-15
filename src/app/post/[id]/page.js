@@ -1,201 +1,323 @@
 'use client'
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Calendar, User, ArrowLeft, Tag, Share } from 'lucide-react';
-import CloudinaryImage from '@/components/CloudinaryImage';
-import RelatedPosts from '@/components/RelatedPosts';
-import FeaturedSidebar from '@/components/FeaturedSidebar';
-import Comments from '@/components/Comments';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
+import { 
+  Calendar, 
+  User, 
+  ArrowLeft, 
+  MessageCircle, 
+  Eye,
+  Share2,
+  Clock
+} from 'lucide-react'
+import CloudinaryImage from '@/components/CloudinaryImage'
+import FeaturedSidebar from '@/components/FeaturedSidebar'
+import RelatedPosts from '@/components/RelatedPosts'
+import CommentSection from '@/components/Comments'
 
-export default function PostDetailPage() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function PostPage({ params }) {
+  const [post, setPost] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const router = useRouter()
 
   useEffect(() => {
-    async function fetchPost() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/posts/${id}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch post');
-        }
-        
-        const data = await response.json();
-        setPost(data.post);
-      } catch (err) {
-        console.error('Error fetching post:', err);
-        setError('Failed to load this article. It may have been removed or is temporarily unavailable.');
-      } finally {
-        setLoading(false);
-      }
+    if (params?.id) {
+      fetchPost(params.id)
     }
+  }, [params?.id])
 
-    if (id) {
-      fetchPost();
+  const fetchPost = async (id) => {
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/posts/${id}`)
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('Post not found')
+        } else {
+          setError('Failed to load post')
+        }
+        return
+      }
+      
+      const postData = await response.json()
+      setPost(postData)
+    } catch (err) {
+      console.error('Error fetching post:', err)
+      setError('Failed to load post')
+    } finally {
+      setLoading(false)
     }
-  }, [id]);
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No date'
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    } catch (err) {
+      return 'Invalid date'
+    }
+  }
+
+  const calculateReadingTime = (content) => {
+    if (!content) return 1
+    const wordsPerMinute = 238
+    const wordCount = content.split(/\s+/).length
+    return Math.ceil(wordCount / wordsPerMinute)
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: post.excerpt || 'Check out this article',
+          url: window.location.href,
+        })
+      } catch (err) {
+        console.log('Error sharing:', err)
+      }
+    } else {
+      // Fallback - copy to clipboard
+      navigator.clipboard.writeText(window.location.href)
+      alert('Link copied to clipboard!')
+    }
+  }
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded max-w-md mb-4"></div>
-          <div className="h-64 sm:h-72 md:h-80 bg-gray-200 rounded-md mb-4"></div>
-          <div className="space-y-2 mb-6">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content Skeleton */}
+            <div className="lg:col-span-2">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+                <div className="h-64 bg-gray-200 rounded-xl mb-8"></div>
+                <div className="h-12 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-4 bg-gray-200 rounded"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Sidebar Skeleton */}
+            <div className="lg:col-span-1">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="mb-6">
+                    <div className="h-24 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <div className="bg-red-50 text-red-700 p-4 sm:p-6 rounded-md">
-          <h2 className="font-bold text-lg mb-2">Error</h2>
-          <p className="mb-4">{error}</p>
-          <Link href="/" className="text-blue-600 hover:underline">
-            Return to homepage
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {error}
+          </h1>
+          <Link 
+            href="/blog"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Blog
           </Link>
         </div>
       </div>
-    );
+    )
   }
 
   if (!post) {
-    return null;
+    return null
   }
 
-  // Check if image is from Cloudinary
-  const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com');
+  const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com')
+  const isLocalUpload = post.imageUrl && (post.imageUrl.includes('/uploads/') || post.imageUrl.startsWith('uploads/'))
+  const placeholderImage = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop&crop=center"
+  
+  let imageToDisplay = post.imageUrl
+  if (isLocalUpload) {
+    imageToDisplay = placeholderImage
+  }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-      {/* Back button */}
-      <Link href="/" className="inline-flex items-center text-gray-600 hover:text-blue-600 mb-4 sm:mb-6">
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        <span>Back to Posts</span>
-      </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <Link 
+            href="/blog"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Blog
+          </Link>
+        </div>
+      </div>
 
-      {/* Post content */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* Main content */}
-        <div className="w-full lg:w-2/3">
-          {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-6">{post.title}</h1>
-          
-          {/* Post meta */}
-          <div className="flex flex-wrap items-center text-sm text-gray-500 mb-4 sm:mb-6">
-            <Calendar className="w-4 h-4 mr-1" />
-            <span className="mr-4">{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-            <User className="w-4 h-4 mr-1" />
-            <span>{post.author?.name || 'Admin'}</span>
-          </div>
-          
-          {/* Featured image - Better responsive handling */}
-          <div className="relative aspect-[16/9] w-full mb-4 sm:mb-6 overflow-hidden rounded-lg">
-            {isCloudinaryImage ? (
-              <CloudinaryImage 
-                src={post.imageUrl} 
-                alt={post.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 60vw"
-                className="object-contain bg-gray-100"
-                priority
-              />
-            ) : post.imageUrl ? (
-              <Image 
-                src={post.imageUrl} 
-                alt={post.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 60vw"
-                className="object-contain bg-gray-100"
-                unoptimized={true}
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-lg">
-                <span className="text-gray-400">No image</span>
+      <div className="py-8">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              <article>
+                {/* Header */}
+                <header className="mb-8">
+                  {/* Category */}
+                  <div className="mb-4">
+                    <Link 
+                      href={`/category/${post.category?.toLowerCase()}`}
+                      className="inline-block bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full uppercase tracking-wider hover:bg-blue-700 transition-colors"
+                    >
+                      {post.category}
+                    </Link>
+                  </div>
+
+                  {/* Title */}
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    {post.title}
+                  </h1>
+
+                  {/* Meta Info */}
+                  <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-6">
+                    <div className="flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      <span>{post.author?.name || 'Admin'}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      <span>{formatDate(post.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 mr-2" />
+                      <span>{calculateReadingTime(post.content)} min read</span>
+                    </div>
+                    {post.views > 0 && (
+                      <div className="flex items-center">
+                        <Eye className="w-5 h-5 mr-2" />
+                        <span>{post.views} views</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span>Share</span>
+                    </button>
+                    
+                    {post.commentsCount > 0 && (
+                      <div className="flex items-center text-gray-600">
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        <span>{post.commentsCount} comments</span>
+                      </div>
+                    )}
+                  </div>
+                </header>
+
+                {/* Featured Image */}
+                {post.imageUrl && (
+                  <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden mb-8 shadow-lg">
+                    {isCloudinaryImage ? (
+                      <CloudinaryImage
+                        src={post.imageUrl}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                        className="object-cover"
+                        priority
+                      />
+                    ) : (
+                      <Image
+                        src={imageToDisplay}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                        className="object-cover"
+                        priority
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
+                  <div className="prose prose-lg max-w-none">
+                    {post.content.split('\n').map((paragraph, index) => (
+                      paragraph.trim() && (
+                        <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                          {paragraph}
+                        </p>
+                      )
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tags */}
+                {post.tags && post.tags.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </article>
+
+              {/* Comments Section */}
+              <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
+                <CommentSection postId={post._id} />
               </div>
-            )}
-          </div>
-          
-          {/* Post content */}
-          <article className="prose prose-sm sm:prose max-w-none mb-6">
-            {post.content.split('\n').map((paragraph, index) => (
-              paragraph.trim() ? <p key={index} className="mb-4">{paragraph}</p> : null
-            ))}
-          </article>
-          
-          {/* Category and tags */}
-          {post.category && (
-            <div className="flex items-center mb-4 sm:mb-6">
-              <Tag className="w-4 h-4 mr-1 text-gray-500" />
-              <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
-                {post.category}
-              </span>
+
+              {/* Related Posts */}
+              <RelatedPosts 
+                postId={post._id} 
+                category={post.category} 
+                limit={3} 
+              />
             </div>
-          )}
-          
-          {/* Share section */}
-          <div className="flex flex-wrap items-center border-t border-b border-gray-100 py-4 sm:py-6 mb-6">
-            <span className="mr-3 font-medium text-sm flex items-center">
-              <Share className="w-4 h-4 mr-1" />
-              Share:
-            </span>
-            <div className="flex space-x-2">
-              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} 
-                target="_blank" rel="noopener noreferrer"
-                className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"></path>
-                </svg>
-              </a>
-              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} 
-                target="_blank" rel="noopener noreferrer"
-                className="bg-blue-400 text-white p-2 rounded-full hover:bg-blue-500">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                </svg>
-              </a>
-              <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} 
-                target="_blank" rel="noopener noreferrer"
-                className="bg-blue-700 text-white p-2 rounded-full hover:bg-blue-800">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
-                </svg>
-              </a>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <FeaturedSidebar currentPostId={post._id} />
             </div>
-          </div>
-          
-          {/* Comments section */}
-          <div className="mb-8">
-            <Comments postId={id} />
-          </div>
-          
-          {/* Related posts */}
-          <div className="mt-8 sm:mt-10">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Related Articles</h2>
-            <RelatedPosts currentPostId={id} category={post.category} />
           </div>
         </div>
-        
-        {/* Sidebar - Only show on larger screens or at bottom on mobile */}
-        <aside className="w-full lg:w-1/3 mt-8 lg:mt-0">
-          <div className="sticky top-20">
-            <FeaturedSidebar />
-          </div>
-        </aside>
       </div>
     </div>
-  );
+  )
 }

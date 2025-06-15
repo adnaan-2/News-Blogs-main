@@ -1,119 +1,147 @@
 'use client'
 import Link from 'next/link'
-import { Calendar, User } from 'lucide-react'
-import { useState } from 'react'
+import { Calendar, User, ArrowRight, MessageCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import CloudinaryImage from './CloudinaryImage'
 import Image from 'next/image'
 
 export default function BlogCard({ post, featured = false }) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  useEffect(() => {
+    if (!post || typeof post !== 'object') {
+      console.error('Invalid post object provided to BlogCard');
+    }
+  }, [post]);
+  
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    if (!dateString) return 'No date';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (err) {
+      console.error('Date formatting error:', err);
+      return 'Invalid date';
+    }
   }
 
-  // Check if image is from Cloudinary
-  const isCloudinaryImage = post.imageUrl && post.imageUrl.includes('cloudinary.com');
+  const truncateText = (text, maxWords = 15) => {
+    if (!text) return 'No content available';
+    const words = text.split(' ');
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ') + '...';
+  }
+
+  const truncateTitle = (title, maxLength = 60) => {
+    if (!title) return 'Untitled Post';
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength).trim() + '...';
+  }
+
+  if (!post || typeof post !== 'object') {
+    return null;
+  }
+
+  const isCloudinaryImage = post.imageUrl && typeof post.imageUrl === 'string' && post.imageUrl.includes('cloudinary.com');
+  const isLocalUpload = post.imageUrl && typeof post.imageUrl === 'string' && 
+    (post.imageUrl.includes('/uploads/') || post.imageUrl.startsWith('uploads/'));
+  
+  const placeholderImage = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop&crop=center";
+
+  let imageToDisplay = post.imageUrl;
+  if (isLocalUpload || imageError) {
+    imageToDisplay = placeholderImage;
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
+    <article className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group border border-gray-100 h-full flex flex-col">
       <Link href={`/post/${post._id}`} className="block">
-        {/* Image section - Fixed height with proper object positioning */}
-        <div className="relative h-52 w-full overflow-hidden rounded-t-lg">
+        {/* Image section - Fixed height */}
+        <div className="relative h-48 w-full overflow-hidden">
           {isCloudinaryImage ? (
             <CloudinaryImage 
               src={post.imageUrl} 
-              alt={post.title}
+              alt={post.title || 'Blog post image'}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover object-center w-full h-full"
-              priority={featured}
-            />
-          ) : post.imageUrl ? (
-            <Image 
-              src={post.imageUrl} 
-              alt={post.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover object-center w-full h-full"
-              unoptimized={true}
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
               priority={featured}
             />
           ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400">No image</span>
-            </div>
+            <Image 
+              src={imageToDisplay}
+              alt={post.title || 'Blog post image'}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+              unoptimized={isLocalUpload}
+              priority={featured}
+              onError={() => setImageError(true)}
+              onLoad={() => setImageLoaded(true)}
+            />
           )}
           
-          {/* Category tag - positioned better */}
-          <div className="absolute bottom-3 left-3 bg-red-600 text-white text-xs px-3 py-1 uppercase font-semibold rounded-sm shadow-md">
-            {post.category}
+          {/* Category badge */}
+          <div className="absolute top-3 left-3">
+            <span className="inline-block bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full uppercase tracking-wider">
+              {post.category || 'Uncategorized'}
+            </span>
           </div>
         </div>
       </Link>
 
-      {/* Content section - using flex-grow to fill space */}
-      <div className="p-4 flex-grow flex flex-col">
-        {/* Headline */}
-        <Link href={`/post/${post._id}`} className="block mb-2">
-          <h2 className="text-xl font-bold line-clamp-2 hover:text-red-600 transition-colors">
-            {post.title}
-          </h2>
-        </Link>
-
-        {/* Publication info */}
-        <div className="flex items-center text-sm text-gray-500 mb-3">
-          <Calendar className="w-4 h-4 mr-1" />
-          <span className="mr-3">{formatDate(post.createdAt)}</span>
-          <User className="w-4 h-4 mr-1" />
-          <span>{post.author?.name || 'Admin'}</span>
+      {/* Content section */}
+      <div className="p-5 flex flex-col flex-grow">
+        {/* Meta information */}
+        <div className="flex items-center text-sm text-gray-500 mb-3 h-5">
+          <div className="flex items-center mr-4">
+            <Calendar className="w-4 h-4 mr-1" />
+            <span>{formatDate(post.createdAt)}</span>
+          </div>
+          <div className="flex items-center">
+            <User className="w-4 h-4 mr-1" />
+            <span>{post.author?.name || 'Admin'}</span>
+          </div>
         </div>
 
-        {/* Article excerpt - with flex-grow to push the footer to the bottom */}
-        <p className="text-gray-700 mb-4 line-clamp-3 text-sm flex-grow">
-          {post.content}
-        </p>
+        {/* Title */}
+        <Link href={`/post/${post._id}`} className="block mb-3">
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 h-12 line-clamp-2 leading-6">
+            {truncateTitle(post.title)}
+          </h3>
+        </Link>
 
-        {/* Social sharing and read more - always at the bottom */}
-        <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-auto">
-          <div className="flex space-x-2">
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + `/post/${post._id}` : '')}`} 
-               target="_blank" rel="noopener noreferrer" 
-               className="text-gray-400 hover:text-blue-600"
-               aria-label="Share on Facebook">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-              </svg>
-            </a>
-            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + `/post/${post._id}` : '')}`} 
-               target="_blank" rel="noopener noreferrer" 
-               className="text-gray-400 hover:text-blue-400"
-               aria-label="Share on Twitter">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
-              </svg>
-            </a>
-            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + `/post/${post._id}` : '')}`} 
-               target="_blank" rel="noopener noreferrer" 
-               className="text-gray-400 hover:text-blue-700"
-               aria-label="Share on LinkedIn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/>
-              </svg>
-            </a>
+        {/* Excerpt */}
+        <div className="flex-grow mb-4">
+          <p className="text-gray-600 text-sm leading-relaxed h-16 line-clamp-3">
+            {truncateText(post.content, 20)}
+          </p>
+        </div>
+
+        {/* Comments count (if you have it) */}
+        {post.commentsCount > 0 && (
+          <div className="flex items-center text-sm text-gray-500 mb-3 py-2 border-t border-gray-100">
+            <MessageCircle className="w-4 h-4 mr-1" />
+            <span>{post.commentsCount} comments</span>
           </div>
-          
+        )}
+
+        {/* Read more link */}
+        <div className="mt-auto">
           <Link 
             href={`/post/${post._id}`}
-            className="text-red-600 hover:text-red-800 font-medium text-sm"
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm group-hover:gap-2 transition-all duration-200"
           >
-            Read More →
+            Read More
+            <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   )
 }
