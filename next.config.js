@@ -5,20 +5,10 @@ const nextConfig = {
   },
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'res.cloudinary.com','photo.unsplash.com'], // Add Cloudinary domain
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      }
+    domains: [
+      'localhost',
+      'res.cloudinary.com', // This is essential for Cloudinary images
+      'images.unsplash.com'
     ],
   },
 }

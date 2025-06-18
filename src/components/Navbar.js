@@ -379,13 +379,13 @@ export default function Navbar() {
         <div className="hidden md:flex justify-center border-t border-gray-700 py-3">
           <nav className="flex items-center space-x-8">
             <Link href="/" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-xl font-bold">Home</Link>
-            <Link href="/business" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Business</Link>
-            <Link href="/tech" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Tech</Link>
-            <Link href="/weather" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Weather</Link>
-            <Link href="/automotive" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Automotive</Link>
-            <Link href="/pakistan" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Pakistan</Link>
-            <Link href="/global" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Global</Link>
-            
+            <Link href="/category/business" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Business</Link>
+            <Link href="/category/tech" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Tech</Link>
+            <Link href="/category/weather" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Weather</Link>
+            <Link href="/category/automotive" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Automotive</Link>
+            <Link href="/category/pakistan" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Pakistan</Link>
+            <Link href="/category/global" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Global</Link>
+
             {/* Lifestyle dropdown menu */}
             <div className="relative">
               <button 
@@ -398,11 +398,11 @@ export default function Navbar() {
               
               {lifestyleDropdownOpen && (
                 <div className="absolute top-full left-0 bg-gray-800 py-3 w-56 shadow-xl rounded-b-md border border-gray-700">
-                  <Link href="/lifestyle/health" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Health</Link>
-                  <Link href="/lifestyle/sports" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Sports</Link>
-                  <Link href="/lifestyle/entertainment" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Entertainment</Link>
-                  <Link href="/lifestyle/education" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Education</Link>
-                  <Link href="/lifestyle/islam" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Religion</Link>
+                  <Link href="/category/lifestyle/health" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Health</Link>
+                  <Link href="/category/lifestyle/sports" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Sports</Link>
+                  <Link href="/category/lifestyle/entertainment" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Entertainment</Link>
+                  <Link href="/category/lifestyle/education" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Education</Link>
+                  <Link href="/category/lifestyle/islam" className="block px-5 py-3 hover:bg-gray-700 text-base font-bold">Religion</Link>
                 </div>
               )}
             </div>
@@ -432,42 +432,42 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link 
-                  href="/business" 
+                  href="/category/business" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Business
                 </Link>
                 <Link 
-                  href="/tech" 
+                  href="/category/tech" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Tech
                 </Link>
                 <Link 
-                  href="/weather" 
+                  href="/category/weather" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Weather
                 </Link>
                 <Link 
-                  href="/automotive" 
+                  href="/category/automotive" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Automotive
                 </Link>
                 <Link 
-                  href="/pakistan" 
+                  href="/category/pakistan" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Pakistan
                 </Link>
                 <Link 
-                  href="/global" 
+                  href="/category/global" 
                   className="py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -486,35 +486,35 @@ export default function Navbar() {
                 {lifestyleDropdownOpen && (
                   <div className="pl-4 border-l-2 border-blue-500 ml-2">
                     <Link 
-                      href="/lifestyle/health" 
+                      href="/category/lifestyle/health" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Health
                     </Link>
                     <Link 
-                      href="/lifestyle/sports" 
+                      href="/category/lifestyle/sports" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Sports
                     </Link>
                     <Link 
-                      href="/lifestyle/entertainment" 
+                      href="/category/lifestyle/entertainment" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Entertainment
                     </Link>
                     <Link 
-                      href="/lifestyle/education" 
+                      href="/category/lifestyle/education" 
                       className="block py-3 hover:bg-gray-800 text-base border-b border-gray-700"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Education
                     </Link>
                     <Link 
-                      href="/lifestyle/islam" 
+                      href="/category/lifestyle/islam" 
                       className="block py-3 hover:bg-gray-800 text-base"
                       onClick={() => setMobileMenuOpen(false)}
                     >

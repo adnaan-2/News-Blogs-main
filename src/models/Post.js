@@ -4,52 +4,39 @@ const PostSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    trim: true
   },
   content: {
     type: String,
-    required: true
+    required: true,
   },
   category: {
     type: String,
     required: true,
-    enum: ['business', 'tech', 'weather', 'automotive', 'pakistan', 
-           'global', 'health', 'sports', 'islam', 'education', 'entertainment']
   },
   imageUrl: {
     type: String,
-    default: null
+    default: null,
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: false // Make author optional since we only have admin users
+    type: String,
+    default: 'Admin',
   },
-  comments: [{
-    user: {
-      type: String,
-      required: true
-    },
-    text: {
-      type: String,
-      required: true
-    },
-    date: {
-      type: Date,
-      default: Date.now
-    }
-  }],
+  views: {
+    type: Number,
+    default: 0,
+  },
+  commentsCount: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-// Check if the model exists before creating it
-const Post = mongoose.models.Post || mongoose.model('Post', PostSchema);
-
-export default Post;
+export default mongoose.models.Post || mongoose.model('Post', PostSchema);

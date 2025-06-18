@@ -2,12 +2,10 @@
 import Link from 'next/link'
 import { Calendar, User, ArrowRight, MessageCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import CloudinaryImage from './CloudinaryImage'
 import Image from 'next/image'
 
 export default function BlogCard({ post, featured = false }) {
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   
   useEffect(() => {
     if (!post || typeof post !== 'object') {
@@ -47,44 +45,41 @@ export default function BlogCard({ post, featured = false }) {
     return null;
   }
 
-  const isCloudinaryImage = post.imageUrl && typeof post.imageUrl === 'string' && post.imageUrl.includes('cloudinary.com');
-  const isLocalUpload = post.imageUrl && typeof post.imageUrl === 'string' && 
-    (post.imageUrl.includes('/uploads/') || post.imageUrl.startsWith('uploads/'));
-  
-  const placeholderImage = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop&crop=center";
-
-  let imageToDisplay = post.imageUrl;
-  if (isLocalUpload || imageError) {
-    imageToDisplay = placeholderImage;
-  }
+  // Handle different image sources
+  const getImageSrc = () => {
+    if (imageError || !post.imageUrl) {
+      return "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop&crop=center";
+    }
+    
+    // If it's already a full Cloudinary URL, use it directly
+    if (post.imageUrl.startsWith('http')) {
+      return post.imageUrl;
+    }
+    
+    // If it's a relative path, assume it's a Cloudinary public_id and construct the URL
+    if (post.imageUrl.includes('cloudinary')) {
+      return post.imageUrl;
+    }
+    
+    // Default fallback
+    return "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop&crop=center";
+  };
 
   return (
     <article className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group border border-gray-100 h-full flex flex-col">
       <Link href={`/post/${post._id}`} className="block">
         {/* Image section - Fixed height */}
         <div className="relative h-48 w-full overflow-hidden">
-          {isCloudinaryImage ? (
-            <CloudinaryImage 
-              src={post.imageUrl} 
-              alt={post.title || 'Blog post image'}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              priority={featured}
-            />
-          ) : (
-            <Image 
-              src={imageToDisplay}
-              alt={post.title || 'Blog post image'}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              unoptimized={isLocalUpload}
-              priority={featured}
-              onError={() => setImageError(true)}
-              onLoad={() => setImageLoaded(true)}
-            />
-          )}
+          <Image 
+            src={getImageSrc()}
+            alt={post.title || 'Blog post image'}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+            priority={featured}
+            onError={() => setImageError(true)}
+            unoptimized={post.imageUrl && post.imageUrl.includes('cloudinary')}
+          />
           
           {/* Category badge */}
           <div className="absolute top-3 left-3">

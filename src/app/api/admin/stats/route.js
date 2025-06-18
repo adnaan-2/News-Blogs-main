@@ -1,157 +1,58 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Post from '@/models/Post';
-import User from '@/models/User';
-import mongoose from 'mongoose';
+import Comment from '@/models/Comment';
 
-export async function GET() {
+export async function GET(request) {
   try {
     await connectDB();
 
-    // Get basic stats
-    const totalPosts = await Post.countDocuments();
-    const totalUsers = await User.countDocuments();
+    // Get all posts with their stats
+    const posts = await Post.find({})
+      .select('title category views commentsCount createdAt')
+      .sort({ createdAt: -1 });
 
-    // Get posts by category
-    const postsByCategory = await Post.aggregate([
+    // Get total stats
+    const totalPosts = await Post.countDocuments();
+    const totalViews = await Post.aggregate([
+      { $group: { _id: null, total: { $sum: '$views' } } }
+    ]);
+    const totalComments = await Comment.countDocuments();
+
+    // Get category-wise stats
+    const categoryStats = await Post.aggregate([
       {
         $group: {
           _id: '$category',
-          count: { $sum: 1 }
+          count: { $sum: 1 },
+          totalViews: { $sum: '$views' },
+          totalComments: { $sum: '$commentsCount' }
         }
       },
-      {
-        $project: {
-          category: '$_id',
-          count: 1,
-          _id: 0
-        }
-      },
-      {
-        $sort: { count: -1 }
-      }
+      { $sort: { count: -1 } }
     ]);
 
-    // Get recent posts with proper author handling
-    const recentPosts = await Post.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('title content category createdAt author')
-      .lean(); // Use lean() for better performance
+    // Get most viewed posts
+    const mostViewedPosts = await Post.find({})
+      .select('title views commentsCount')
+      .sort({ views: -1 })
+      .limit(10);
 
-    // Process recent posts to handle author field properly
-    const processedRecentPosts = recentPosts.map(post => ({
-      ...post,
-      author: typeof post.author === 'string' ? { name: post.author } : post.author || { name: 'Admin' }
-    }));
-
-    // Get posts published in the last 30 days
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentPostsCount = await Post.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo }
-    });
-
-    // Get most popular posts (assuming you have likes/views field)
-    const popularPosts = await Post.find()
-      .sort({ likes: -1, views: -1, createdAt: -1 })
-      .limit(5)
-      .select('title likes views createdAt category')
-      .lean();
-
-    // Get posts by month for the last 6 months
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
-    const postsByMonth = await Post.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: sixMonthsAgo }
-        }
+    return NextResponse.json({
+      posts,
+      totalStats: {
+        totalPosts,
+        totalViews: totalViews[0]?.total || 0,
+        totalComments,
       },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
-      },
-      {
-        $project: {
-          _id: 0,
-          month: {
-            $dateToString: {
-              format: '%Y-%m',
-              date: {
-                $dateFromParts: {
-                  year: '$_id.year',
-                  month: '$_id.month',
-                  day: 1
-                }
-              }
-            }
-          },
-          count: 1
-        }
-      }
-    ]);
-
-    // Calculate growth rate
-    const lastMonth = new Date();
-    lastMonth.setMonth(lastMonth.getMonth() - 1);
-    const lastMonthStart = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
-    const lastMonthEnd = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0);
-
-    const thisMonthStart = new Date();
-    thisMonthStart.setDate(1);
-
-    const lastMonthPosts = await Post.countDocuments({
-      createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd }
+      categoryStats,
+      mostViewedPosts
     });
-
-    const thisMonthPosts = await Post.countDocuments({
-      createdAt: { $gte: thisMonthStart }
-    });
-
-    const growthRate = lastMonthPosts > 0 
-      ? ((thisMonthPosts - lastMonthPosts) / lastMonthPosts * 100).toFixed(1)
-      : 0;
-
-    const stats = {
-      totalPosts,
-      totalUsers,
-      recentPostsCount,
-      growthRate: parseFloat(growthRate),
-      postsByCategory: postsByCategory || [],
-      recentPosts: processedRecentPosts || [],
-      popularPosts: popularPosts || [],
-      postsByMonth: postsByMonth || [],
-      lastUpdated: new Date().toISOString()
-    };
-
-    return NextResponse.json(stats);
 
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
-    // Return a fallback response instead of throwing
-    return NextResponse.json({
-      totalPosts: 0,
-      totalUsers: 0,
-      recentPostsCount: 0,
-      growthRate: 0,
-      postsByCategory: [],
-      recentPosts: [],
-      popularPosts: [],
-      postsByMonth: [],
-      error: 'Failed to fetch stats',
-      lastUpdated: new Date().toISOString()
+    return NextResponse.json({ 
+      error: 'Failed to fetch stats' 
     }, { status: 500 });
   }
 }

@@ -3,24 +3,25 @@ import mongoose from 'mongoose';
 const CommentSchema = new mongoose.Schema({
   postId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post',
     required: true,
-    ref: 'Post'
   },
-  userName: {
+  name: {
     type: String,
-    required: true
+    required: true,
   },
-  content: {
+  email: {
     type: String,
-    required: true
+    required: true,
+  },
+  comment: {
+    type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-// Check if the model already exists to prevent OverwriteModelError
-const Comment = mongoose.models.Comment || mongoose.model('Comment', CommentSchema);
-
-export default Comment;
+export default mongoose.models.Comment || mongoose.model('Comment', CommentSchema);

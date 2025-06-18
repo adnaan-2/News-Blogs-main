@@ -59,14 +59,15 @@ export async function PUT(request, { params }) {
     };
     
     // Upload new image to Cloudinary if provided
-    if (image && image instanceof File) {
+    if (image && image instanceof File && image.size > 0) {
       try {
+        console.log('Uploading new image to Cloudinary...');
         updateData.imageUrl = await uploadImage(image);
         console.log('New image uploaded to Cloudinary:', updateData.imageUrl);
       } catch (uploadError) {
         console.error('Error uploading image:', uploadError);
         return NextResponse.json(
-          { error: 'Failed to upload image' },
+          { error: 'Failed to upload image to Cloudinary' },
           { status: 500 }
         );
       }
@@ -85,7 +86,10 @@ export async function PUT(request, { params }) {
     });
   } catch (error) {
     console.error('Error updating post:', error);
-    return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to update post', 
+      details: error.message 
+    }, { status: 500 });
   }
 }
 

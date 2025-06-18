@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Post from '@/models/Post';
+import { uploadImage } from '@/lib/cloudinary';
 import mongoose from 'mongoose';
 
 export async function GET(request) {
@@ -84,17 +85,21 @@ export async function POST(request) {
     let imageUrl = null;
     
     // Upload image to Cloudinary if provided
-    if (image && image instanceof File) {
+    if (image && image instanceof File && image.size > 0) {
       try {
-        // Your image upload logic here
-        // For now, we'll use a placeholder URL
-        imageUrl = `/uploads/${Date.now()}-${image.name}`;
+        console.log('Uploading image to Cloudinary...');
+        imageUrl = await uploadImage(image);
+        console.log('Image uploaded successfully:', imageUrl);
       } catch (uploadError) {
         console.error('Error uploading image:', uploadError);
+        return NextResponse.json(
+          { error: 'Failed to upload image to Cloudinary' },
+          { status: 500 }
+        );
       }
     }
     
-    // Create new post document - without requiring a real user reference
+    // Create new post document
     const post = await Post.create({
       title,
       content,
@@ -111,7 +116,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error creating post:', error);
     return NextResponse.json(
-      { error: 'Failed to create post' },
+      { error: 'Failed to create post', details: error.message },
       { status: 500 }
     );
   }
