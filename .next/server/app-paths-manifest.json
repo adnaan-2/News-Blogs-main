@@ -1,11 +1,8 @@
 {
   "/page": "app/page.js",
-  "/post/[id]/page": "app/post/[id]/page.js",
-  "/api/posts/[id]/route": "app/api/posts/[id]/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/posts/route": "app/api/posts/route.js",
-  "/api/posts/[id]/view/route": "app/api/posts/[id]/view/route.js",
-  "/api/posts/[id]/comments/route": "app/api/posts/[id]/comments/route.js",
-  "/api/admin/stats/route": "app/api/admin/stats/route.js",
+  "/category/business/page": "app/category/business/page.js",
+  "/post/[id]/page": "app/post/[id]/page.js",
+  "/admin/posts/create/page": "app/admin/posts/create/page.js",
   "/admin/dashboard/page": "app/admin/dashboard/page.js"
 }
