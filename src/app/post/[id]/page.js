@@ -101,14 +101,13 @@ export default function PostDetailPage() {
       })
 
       if (response.ok) {
-        const data = await response.json()
         alert('Comment added successfully!')
         setCommentForm({ name: '', email: '', comment: '' })
         // Refresh comments to show the new comment immediately
         fetchComments(params.id)
       } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to submit comment')
+        const errorData = await response.json()
+        alert(errorData.error || 'Failed to submit comment')
       }
     } catch (error) {
       console.error('Error submitting comment:', error)

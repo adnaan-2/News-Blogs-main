@@ -2,14 +2,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import BlogCard from '@/components/BlogCard'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, TrendingUp, ChevronRight, Sparkles, Star } from 'lucide-react'
 
 export default function Home() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm] = useState('')
   const router = useRouter()
 
   // Handle admin search

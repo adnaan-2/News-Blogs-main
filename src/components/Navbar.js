@@ -1,7 +1,6 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
 import { Menu, X, ChevronDown, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -15,7 +14,6 @@ export default function Navbar() {
   const [showResults, setShowResults] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const searchRef = useRef(null)
-  const { data: session } = useSession()
   const router = useRouter()
 
   // Close search results when clicking outside
@@ -41,7 +39,7 @@ export default function Navbar() {
         setSearchResults([])
         setShowResults(false)
       }
-    }, 300) // 300ms debounce
+    }, 300)
 
     return () => clearTimeout(timer)
   }, [searchQuery])
@@ -60,8 +58,8 @@ export default function Navbar() {
       const data = await response.json()
       setSearchResults(data.posts || [])
       setShowResults(true)
-    } catch (error) {
-      console.error('Error fetching search results:', error)
+    } catch (searchError) {
+      console.error('Error fetching search results:', searchError)
     } finally {
       setIsSearching(false)
     }
@@ -123,7 +121,6 @@ export default function Navbar() {
     })
   }
 
-  // Function to highlight the search term in results
   const highlightSearchTerm = (text) => {
     if (!searchQuery.trim()) return text
     
@@ -138,7 +135,8 @@ export default function Navbar() {
           )}
         </>
       )
-    } catch (e) {
+    } catch (highlightError) {
+      console.error('Error highlighting text:', highlightError)
       return text
     }
   }
@@ -174,7 +172,6 @@ export default function Navbar() {
                   </button>
                 </div>
                 
-                {/* Mobile search results */}
                 {showResults && (
                   <div className="mt-3 bg-gray-800 rounded-md border border-gray-700 max-h-96 overflow-y-auto">
                     {isSearching ? (
@@ -194,7 +191,6 @@ export default function Navbar() {
                                 className="w-full px-3 py-2 text-left hover:bg-gray-700 flex items-start gap-3"
                                 onClick={() => handleResultClick(post._id)}
                               >
-                                {/* Thumbnail */}
                                 <div className="w-12 h-12 relative flex-shrink-0 bg-gray-700">
                                   {post.imageUrl && (
                                     <Image 
@@ -207,7 +203,6 @@ export default function Navbar() {
                                   )}
                                 </div>
                                 
-                                {/* Content */}
                                 <div className="flex-1">
                                   <div className="text-sm font-medium text-white line-clamp-2">
                                     {highlightSearchTerm(post.title)}
@@ -238,7 +233,7 @@ export default function Navbar() {
                       </>
                     ) : (
                       <div className="p-4 text-center text-gray-400">
-                        No results found for "{searchQuery}"
+                        No results found for &quot;{searchQuery}&quot;
                       </div>
                     )}
                   </div>
@@ -250,14 +245,12 @@ export default function Navbar() {
       )}
 
       <div className="container mx-auto px-4">
-        {/* Mobile navbar - Dark theme */}
+        {/* Mobile navbar */}
         <div className="flex justify-between items-center h-16 md:hidden">
-          {/* Menu button */}
           <button className="p-2" onClick={toggleMenu} aria-label="Toggle menu">
             <Menu size={24} />
           </button>
           
-          {/* Logo in center */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-extrabold">
               <span className="text-white">Pakistan</span>
@@ -265,7 +258,6 @@ export default function Navbar() {
             </span>
           </Link>
           
-          {/* Search button */}
           <button className="p-2" onClick={toggleMobileSearch} aria-label="Search">
             <Search size={24} />
           </button>
@@ -273,13 +265,11 @@ export default function Navbar() {
         
         {/* Desktop navbar */}
         <div className="hidden md:flex justify-between items-center py-6">
-          {/* Logo on the left */}
           <Link href="/" className="text-5xl font-extrabold tracking-tight">
               <span className="text-white">Pakistan</span>
               <span className="text-blue-400">Info</span>
           </Link>
           
-          {/* Search Bar on the right (desktop only) */}
           <div className="w-full max-w-md" ref={searchRef}>
             <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
@@ -303,7 +293,6 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Live search results dropdown */}
               {showResults && (
                 <div className="absolute mt-1 w-full bg-gray-800 rounded-md shadow-lg border border-gray-700 z-50 max-h-96 overflow-y-auto">
                   {isSearching ? (
@@ -323,7 +312,6 @@ export default function Navbar() {
                               className="w-full px-3 py-2 text-left hover:bg-gray-700 flex items-start gap-3"
                               onClick={() => handleResultClick(post._id)}
                             >
-                              {/* Thumbnail */}
                               <div className="w-12 h-12 relative flex-shrink-0 bg-gray-700">
                                 {post.imageUrl && (
                                   <Image 
@@ -336,7 +324,6 @@ export default function Navbar() {
                                 )}
                               </div>
                               
-                              {/* Content */}
                               <div className="flex-1">
                                 <div className="text-sm font-medium text-white line-clamp-2">
                                   {highlightSearchTerm(post.title)}
@@ -366,7 +353,7 @@ export default function Navbar() {
                     </>
                   ) : (
                     <div className="p-3 text-center text-gray-400">
-                      No results found for "{searchQuery}"
+                      No results found for &quot;{searchQuery}&quot;
                     </div>
                   )}
                 </div>
@@ -386,7 +373,6 @@ export default function Navbar() {
             <Link href="/category/pakistan" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Pakistan</Link>
             <Link href="/category/global" className="py-3 px-2 hover:text-blue-400 transition-colors uppercase text-lg font-bold">Global</Link>
 
-            {/* Lifestyle dropdown menu */}
             <div className="relative">
               <button 
                 onClick={toggleLifestyleDropdown}
@@ -409,7 +395,7 @@ export default function Navbar() {
           </nav>
         </div>
         
-        {/* Mobile Navigation Menu - Dark theme */}
+        {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-70 z-50">
             <div className="bg-gray-900 h-full w-3/4 max-w-xs text-white p-5 overflow-y-auto border-r border-gray-700">
@@ -474,7 +460,6 @@ export default function Navbar() {
                   Global
                 </Link>
                 
-                {/* Lifestyle section */}
                 <button 
                   className="flex items-center justify-between w-full py-3 px-2 hover:bg-gray-800 text-lg font-bold border-b border-gray-700"
                   onClick={() => setLifestyleDropdownOpen(!lifestyleDropdownOpen)}

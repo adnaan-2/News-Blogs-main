@@ -10,11 +10,10 @@ import {
   Eye, 
   MessageCircle, 
   TrendingUp, 
-  BarChart3,
   Edit,
   Trash2,
   Calendar,
-  Users
+  
 } from 'lucide-react'
 
 export default function AdminDashboard() {

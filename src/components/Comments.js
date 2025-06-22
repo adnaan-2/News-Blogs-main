@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { User, Send } from 'lucide-react'
 
 export default function Comments({ postId }) {
@@ -9,14 +9,8 @@ export default function Comments({ postId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Fetch comments when component mounts
-  useEffect(() => {
-    if (postId) {
-      fetchComments()
-    }
-  }, [postId])
-
-  const fetchComments = async () => {
+  // Memoize fetchComments to avoid unnecessary re-renders
+  const fetchComments = useCallback(async () => {
     try {
       setIsLoading(true)
       const res = await fetch(`/api/comments?postId=${postId}`)
@@ -33,7 +27,14 @@ export default function Comments({ postId }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [postId])
+
+  // Fetch comments when component mounts
+  useEffect(() => {
+    if (postId) {
+      fetchComments()
+    }
+  }, [postId, fetchComments])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

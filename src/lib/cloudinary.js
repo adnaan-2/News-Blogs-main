@@ -30,7 +30,8 @@ export const uploadImage = async (file) => {
         }
       ).end(buffer);
     });
-  } catch (error) {
+  } catch (uploadError) {
+    console.error('Cloudinary upload error:', uploadError);
     throw new Error('Failed to upload image');
   }
 };
