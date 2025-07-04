@@ -6,20 +6,29 @@ import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
+    email: 'admin@example.com',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { status } = useSession();
+  const { status, data: session } = useSession();
 
-  // Check if admin is already logged in
+  // Improved redirect logic
   useEffect(() => {
+    // Only redirect if authenticated and user has admin role
     if (status === 'authenticated') {
-      router.replace('/admin/dashboard');
+      console.log('✅ User authenticated, session:', session);
+      
+      if (session?.user?.role === 'admin') {
+        console.log('✅ Admin user detected, redirecting to dashboard');
+        router.push('/admin/dashboard');
+      } else {
+        console.log('❌ Not an admin user:', session?.user);
+        setError('You do not have admin privileges');
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,50 +38,35 @@ export default function AdminLoginPage() {
     }));
   };
 
-  // Pre-fill admin email
-  const handlePreFillEmail = () => {
-    setFormData(prev => ({
-      ...prev,
-      email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@example.com'
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      console.log('🔐 Attempting login with:', formData.email);
+      
       const result = await signIn('credentials', {
         redirect: false,
         email: formData.email,
         password: formData.password
       });
 
-      if (result?.error) {
-        setError('Invalid admin credentials');
-        setLoading(false);
-        return;
-      }
+      console.log('🔍 Login result:', result);
 
-      // Successful login, redirect to admin dashboard
-      router.push('/admin/dashboard');
-      
+      if (result?.error) {
+        setError(result.error === 'CredentialsSignin' ? 
+          'Invalid email or password' : result.error);
+      } else if (result?.ok) {
+        router.push('/admin/dashboard');
+      }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('An error occurred during login');
+      console.error('❌ Login error:', err);
+      setError('An unexpected error occurred');
+    } finally {
       setLoading(false);
     }
   };
-
-  // If still checking authentication status
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -93,7 +87,7 @@ export default function AdminLoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Admin Email
+                Email address
               </label>
               <div className="mt-1">
                 <input
@@ -104,14 +98,14 @@ export default function AdminLoginPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Admin Password
+                Password
               </label>
               <div className="mt-1">
                 <input
@@ -122,7 +116,7 @@ export default function AdminLoginPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -131,21 +125,31 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
               >
-                {loading ? 'Signing in...' : 'Sign in as Admin'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <button
-              onClick={handlePreFillEmail}
-              className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          
+          <div className="mt-4 text-center text-sm">
+            <button 
+              type="button"
+              onClick={() => setFormData({
+                email: 'admin@example.com',
+                password: 'secureadminpassword123'
+              })}
+              className="text-indigo-600 hover:text-indigo-500"
             >
-              Use Default Admin Email
+              Use default admin credentials
             </button>
           </div>
+        </div>
+        
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Default admin: admin@example.com / secureadminpassword123
+          </p>
         </div>
       </div>
     </div>
